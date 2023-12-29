@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>KafkaFactory</groupId>
+	<artifactId>KafkaFactory</artifactId>
+	<version>0.0.1</version>
+	<name>KafkaFactory</name>
+	<description>Kafka Factory Consumer and Producer Wrapper</description>
+	<packaging>jar</packaging>
+	
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<!--  https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind  -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.16.0</version>
+		</dependency>
+		<!--  https://mvnrepository.com/artifact/io.confluent/kafka-connect-avro-converter  -->
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-connect-avro-converter</artifactId>
+			<version>7.5.1</version>
+		</dependency>
+		<!--  https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10  -->
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc10</artifactId>
+			<version>19.21.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.16</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<release>11</release>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
