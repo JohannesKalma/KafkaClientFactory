@@ -22,7 +22,7 @@ KafkaClientFactory cf = new KafakClientFactory().setBootstrapServers("host1:9095
 
 new Producer(cf).publish().printMetadata();
 ```
-This same producer can also be setup from a json:
+This same producer can also be setup from a json. Here Jackson is needed to map the json on the values in an instantiated class.
 ```
 String json = "{\r\n"
              + "  \"bootstrapServers\" : \"host1:9095,host2:9095,host3:9095\",\r\n"
