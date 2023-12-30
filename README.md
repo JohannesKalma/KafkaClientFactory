@@ -58,7 +58,8 @@ DTO variables that can be set :
 - bootstrapServerTruststoreCertificate String (the PEM Certificate Document)
 - schemaRegistrycredentials Credentials
 - schemaRegistryURL String
-- typeDeSer KafkaClientFactory.typeDeSer - groupId String
+- typeDeSer KafkaClientFactory.typeDeSer
+- groupId String
 - topic String
 - className String (DTO class needed for AVRO (de)serializing)
 - key String
