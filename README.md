@@ -13,12 +13,13 @@ Produce a message on a topic and print the propertie,parameters and metadata of 
 ```
 PrintWriter pw = new PrintWriter(System.out,true);
 KafkaClientFactory cf = new KafkaClientFactory().setBootstrapServers("host1:9095,host2:9095,host3:9095")
-				                .setBootstrapServersCredentials(new Credentials("username","passwarod"))
-				                .setTopic("myTopic")
-				                .setValue("this is the message")
-				                .setPrintwriter(pw)
-				                .printProperties()
-				                .printParameters();
+																                .setBootstrapServersCredentials(new Credentials("username","passwarod"))
+																                .setTypeDeSer(typeDeSer.STRINGSER)
+																                .setTopic("myTopic")
+																                .setValue("this is the message")
+																                .setPrintwriter(pw)
+																                .printProperties()
+																                .printParameters();
 
 new Producer(cf).publish().printMetadata();
 ```
@@ -31,12 +32,25 @@ String json = "{\r\n"
              + "    \"password\" : \"password\"\r\n"
              + "  },\r\n"
              + "  \"topic\" : \"myTopic\",\r\n"
-             + "  \"value\" : \"this is the message\"\r\n
+             + "  \"value\" : \"this is the message\",\r\n
+             + "  \"typeDeSer\" : \"STRINGSER\"\r\n
              + "}";
 
 ObjectMapper mapper = new ObjectMapper();
 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);		
 new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(jcsOut).printProperties().printParameters()).publish().printMetadata();
 ```
+
+The results are these kafka properties:
+```
+security.protocol: SASL_SSL
+value.serializer: class org.apache.kafka.common.serialization.StringSerializer
+sasl.mechanism: PLAIN
+sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="username" password="passwarod";
+acks: all
+bootstrap.servers: host1:9095,host2:9095,host3:9095
+key.serializer: class org.apache.kafka.common.serialization.StringSerializer
+```
+
 
 Johannes K

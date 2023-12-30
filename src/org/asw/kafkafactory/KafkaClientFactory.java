@@ -88,22 +88,25 @@ public class KafkaClientFactory {
 	Credentials jdbcCredentials;
 	String jdbcQuery;
 	PrintWriter printwriter;
-  Connection connection;
+	Connection connection;
 
-  /**
-   * get instance of PrintWriter
-   * @return instance of PrintWriter
-   */
-  public PrintWriter getPrintwriter() {
+	/**
+	 * get instance of PrintWriter
+	 * 
+	 * @return instance of PrintWriter
+	 */
+	public PrintWriter getPrintwriter() {
 		return printwriter;
 	}
 
-  /**
-   * set PrintWriter where to write the output (jcsOut for RMJ, System.out for java)
-   * 
-   * @param printwriter where to write the output (jcsOut for RMJ, System.out for java)
-   * @return KafkaClientFactory instance
-   */
+	/**
+	 * set PrintWriter where to write the output (jcsOut for RMJ, System.out for
+	 * java)
+	 * 
+	 * @param printwriter where to write the output (jcsOut for RMJ, System.out for
+	 *                    java)
+	 * @return KafkaClientFactory instance
+	 */
 	public KafkaClientFactory setPrintwriter(PrintWriter printwriter) {
 		this.printwriter = printwriter;
 		return this;
@@ -143,6 +146,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set typeDeSer<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param typeDeSer enum typeDeSer
 	 */
@@ -162,6 +166,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set schemaRegistryURL<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param schemaRegistryURL String
 	 */
@@ -201,6 +206,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set groupId<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param groupId String
 	 */
@@ -220,6 +226,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set bootstrapServers (a list of brokers)<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServers STring
 	 */
@@ -239,6 +246,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set instance of bootstrapServersCredentials<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServersCredentials Credentials
 	 */
@@ -262,6 +270,7 @@ public class KafkaClientFactory {
 	 * get bootstrapServerTruststoreCertificate<br>
 	 * <br>
 	 * This is also known as the PEM Certificate Document
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServerTruststoreCertificate String
 	 */
@@ -281,6 +290,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * set Kafka topic<br>
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param topic String
 	 */
@@ -314,6 +324,7 @@ public class KafkaClientFactory {
 	/**
 	 * get partition()<br>
 	 * partition needed to seek a message
+	 * 
 	 * @return partition String
 	 */
 	public String getPartition() {
@@ -343,9 +354,8 @@ public class KafkaClientFactory {
 	}
 
 	/**
-	 * set offset
-	 * offset needed to seek a message
-	 
+	 * set offset offset needed to seek a message
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param offset String
 	 */
@@ -367,6 +377,7 @@ public class KafkaClientFactory {
 	/**
 	 * set value<br>
 	 * value parsed as Kafka message
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param value String
 	 */
@@ -386,8 +397,9 @@ public class KafkaClientFactory {
 	}
 
 	/**
-	 * set key
-	 * According to Kafka documentation, optional, but in this setting mandatory
+	 * set key According to Kafka documentation, optional, but in this setting
+	 * mandatory
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param key String
 	 */
@@ -409,6 +421,7 @@ public class KafkaClientFactory {
 	/**
 	 * set jdbcUrl<br>
 	 * For dataprocessing
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param jdbcUrl String
 	 */
@@ -420,6 +433,7 @@ public class KafkaClientFactory {
 	/**
 	 * get object of jdbcCredentials<br>
 	 * For dataprocessing
+	 * 
 	 * @return jdbcCredentials Credentials
 	 */
 	public Credentials getJdbcCredentials() {
@@ -429,6 +443,7 @@ public class KafkaClientFactory {
 	/**
 	 * set object of jdbcCredentials<br>
 	 * For dataprocessing
+	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param jdbcCredentials Credentials
 	 */
@@ -440,6 +455,7 @@ public class KafkaClientFactory {
 	/**
 	 * get jdbcQuery()<br>
 	 * For dataprocessing
+	 * 
 	 * @return jdbcQuery String
 	 */
 	public String getJdbcQuery() {
@@ -450,55 +466,61 @@ public class KafkaClientFactory {
 	 * set jdbcQuery<br>
 	 * For dataprocessing
 	 * 
-	 *  <p>for subscriber:<br> 
-	 *  - [[PACKAGE.]PROCEDURE_NAME(param1=>'abcd',param2=>'?')]: 1 parameter for the return value of the topic</p>
-	 *  
-	 *  <p>for the producer (ref cursor):<br>
-	 *  - for a producer, a ref cursor is implied [FUNCTION_NAME returning a ref cursor]</p>
+	 * <p>
+	 * for subscriber:<br>
+	 * - [[PACKAGE.]PROCEDURE_NAME(param1=>'abcd',param2=>'?')]: 1 parameter for the
+	 * return value of the topic
+	 * </p>
 	 * 
-	 * @return instance of KafkaClientFactory 
+	 * <p>
+	 * for the producer (ref cursor):<br>
+	 * - for a producer, a ref cursor is implied [FUNCTION_NAME returning a ref
+	 * cursor]
+	 * </p>
+	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param jdbcQuery String
 	 */
 	public KafkaClientFactory setJdbcQuery(String jdbcQuery) {
-		this.jdbcQuery = String.format("BEGIN %s; END;",jdbcQuery);
-	  return this;
+		this.jdbcQuery = String.format("BEGIN %s; END;", jdbcQuery);
+		return this;
 	}
 
-	
 	/**
 	 * set a JDBC connection for factory url and credentials<br>
 	 * result is a Connection value
 	 * 
 	 * @return instance of KafkaClientFactory
 	 * @throws ClassNotFoundException --
-	 * @throws SQLException --
+	 * @throws SQLException           --
 	 */
 	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
-			if (KafkaUtil.isNotBlank(getJdbcUrl())) {
-				Class.forName("oracle.jdbc.OracleDriver");
-				this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(), getJdbcCredentials().getPassword());
-				printDatabaseMetaData();
-			}
-		  print("Connection "+connection.toString());
-		  return this;
+		if (KafkaUtil.isNotBlank(getJdbcUrl())) {
+			Class.forName("oracle.jdbc.OracleDriver");
+			this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
+					getJdbcCredentials().getPassword());
+			printDatabaseMetaData();
+		}
+		print("Connection " + connection.toString());
+		return this;
 	}
-	
+
 	/**
 	 * if set, return a jdbc connection.<br>
 	 * when not set, set the connection (@link #setJdbcConnection())
+	 * 
 	 * @return Connection a jdbc connection
 	 * 
 	 * @throws ClassNotFoundException only needed for the setJdbcConnection
-	 * @throws SQLException only needed for the setJdbcConnection
+	 * @throws SQLException           only needed for the setJdbcConnection
 	 */
 	public Connection jdbcConnection() throws ClassNotFoundException, SQLException {
 		if (this.connection == null) {
 			setJdbcConnection();
 		}
-		return this.connection;	
+		return this.connection;
 	}
-	
-	
+
 	/**
 	 * close an open jdbc connection
 	 * 
@@ -509,15 +531,15 @@ public class KafkaClientFactory {
 			this.connection.close();
 		}
 	}
-	
+
 	private void printDatabaseMetaData() throws SQLException {
 		DatabaseMetaData dbmd = connection.getMetaData();
-		print(String.format("Driver Name: %s",dbmd.getDriverName()));
-		print(String.format("Driver Version:  %s",dbmd.getDriverVersion()));
-		print(String.format("Database Username is:  %s",dbmd.getUserName()));
+		print(String.format("Driver Name: %s", dbmd.getDriverName()));
+		print(String.format("Driver Version:  %s", dbmd.getDriverVersion()));
+		print(String.format("Database Username is:  %s", dbmd.getUserName()));
 
 	}
-	
+
 	/**
 	 * This in not part of the DTO, it generates a SpecificRecord based on
 	 * KafkaClientFactory DTO values
@@ -534,7 +556,8 @@ public class KafkaClientFactory {
 	/**
 	 * This is not part of the DTO, it's being called from the publisher
 	 * 
-	 * @return if AVROSER object of type {@link #specificRecord()} else Object of type {@link #getValue()} {@link String}
+	 * @return if AVROSER object of type {@link #specificRecord()} else Object of
+	 *         type {@link #getValue()} {@link String}
 	 * @throws Exception generic exception
 	 */
 	public Object publishValue() throws Exception {
@@ -551,16 +574,19 @@ public class KafkaClientFactory {
 
 		if (this.getSchemaRegistryURL() != null) {
 			properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, this.getSchemaRegistryURL());
-			properties.put(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
-			properties.put(SchemaRegistryClientConfig.USER_INFO_CONFIG, String.format("%s:%s",
-					this.getSchemaRegistryCredentials().getUserName(), this.getSchemaRegistryCredentials().getPassword()));
+			if (this.getSchemaRegistryCredentials() != null) {
+				properties.put(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+				properties.put(SchemaRegistryClientConfig.USER_INFO_CONFIG, String.format("%s:%s",
+						this.getSchemaRegistryCredentials().getUserName(), this.getSchemaRegistryCredentials().getPassword()));
+			}
 		}
 
 		return properties;
 	}
 
 	/**
-	 * This is not part of the DTO, it's the result of the KafkaClientFactory DTO values needed for instantiating a Kafka client.
+	 * This is not part of the DTO, it's the result of the KafkaClientFactory DTO
+	 * values needed for instantiating a Kafka client.
 	 * 
 	 * @return properties for KafkaClient
 	 */
@@ -577,8 +603,10 @@ public class KafkaClientFactory {
 					"org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
 					this.getBootstrapServersCredentials().getUserName(), this.getBootstrapServersCredentials().getPassword()));
 			// SSL PemCertification
-			properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
-			properties.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, this.getBootstrapServerTruststoreCertificate());
+			if (this.getBootstrapServerTruststoreCertificate() != null) {
+				properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
+				properties.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, this.getBootstrapServerTruststoreCertificate());
+			}
 		}
 
 		if (KafkaUtil.isNotBlank(this.getGroupId()))
@@ -616,19 +644,20 @@ public class KafkaClientFactory {
 	/**
 	 * Print generated properties for an instantiated KafkaClientFactory:<br>
 	 * initialize printwriter (setPrintWriter) is assumed
+	 * 
 	 * @return KafkaClientFactory object
 	 */
 	public KafkaClientFactory printProperties() {
-	  return printProperties(this.getPrintwriter());
+		return printProperties(this.getPrintwriter());
 	}
-	
+
 	/**
 	 * Print generated properties for an instantiated KafkaClientFactory:<br>
 	 * 
 	 * @param p PrintWriter
 	 * @return KafkaClientFactory object
 	 */
-	public KafkaClientFactory printProperties(PrintWriter p){
+	public KafkaClientFactory printProperties(PrintWriter p) {
 		print("==== Properties ==== ");
 		Enumeration<Object> keys = getProperties().keys();
 		while (keys.hasMoreElements()) {
@@ -643,15 +672,16 @@ public class KafkaClientFactory {
 		return this;
 	}
 
-  /**
-   * Print a string to the PrintWriter
-   * @param m String
-   */
-	public void print(String m){
-		//PrintWriter p = this.printwriter;
-	  this.printwriter.println(m);
+	/**
+	 * Print a string to the PrintWriter
+	 * 
+	 * @param m String
+	 */
+	public void print(String m) {
+		// PrintWriter p = this.printwriter;
+		this.printwriter.println(m);
 	}
-	
+
 	/**
 	 * Print all DTO values for an instantiated KafkaClientFactory:<br>
 	 * Method prints all get methods<br>
