@@ -41,7 +41,7 @@ mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(jcsOut).printProperties().printParameters()).publish().printMetadata();
 ```
 
-The results are these kafka properties:
+The result is a set of Kafka properties:
 ```
 security.protocol: SASL_SSL
 value.serializer: class org.apache.kafka.common.serialization.StringSerializer
