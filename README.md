@@ -39,5 +39,4 @@ mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(jcsOut).printProperties().printParameters()).publish().printMetadata();
 ```
 
-grt
-Johannes
+Johannes K
