@@ -36,7 +36,7 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * Advice is to <i>not</i> explicitly set the values, but instead use an ObjectMapper (like
  * Jackson) and then only use those values that are needed for your
  * subscriber/consumer.<br>
- * One such mapper is the {@link JobParameterMap}, that can be used as bridge for RunMyJobs scheduled Kafka processes<br>
+ * One such mapper is the JobParameterMap (see github https://github.com/JohannesKalma/RunMyJobsKafkaClientFactoryParameterMapper), that can be used as bridge for RunMyJobs scheduled Kafka processes<br>
  *<br>
  * Examples of usages:
  * - When the message is String serialized, then there is no need to use a schema server. In that case just leave out about the schemaRegistryURL and schemaRegistryCredentials.<br>
@@ -62,12 +62,6 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * - jdbcCredentials {@link Credentials}<br>
  * - jdbcQuery String<br>
  * 
- * @author JKALMA<br>
- */
-
-/**
- * @author JKALMA
- *
  */
 public class KafkaClientFactory {
 	String bootstrapServers;
