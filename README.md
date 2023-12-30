@@ -22,3 +22,19 @@ KafkaClientFactory cf = new KafakClientFactory().setBootstrapServers("host1:9095
 
 new Producer(cf).publish().printMetadata();
 ```
+This same producer can also be setup from a json:
+```
+String json = "{\r\n"
+             + "  \"bootstrapServers\" : \"host1:9095,host2:9095,host3:9095\",\r\n"
+             + "  \"bootstrapServersCredentials\" : {\r\n"
+             + "    \"userName\" : \"username\",\r\n"
+             + "    \"password\" : \"password\"\r\n"
+             + "  },\r\n"
+             + "  \"topic\" : \"myTopic\",\r\n"
+             + "  \"value\" : \"this is the message\"\r\n
+             + "}";
+
+ObjectMapper mapper = new ObjectMapper();
+mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);		
+new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(jcsOut).printProperties().printParameters()).publish().printMetadata();
+```
