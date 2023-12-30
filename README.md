@@ -1,4 +1,4 @@
-## KafkaClientFactory with Consumer and Producer Wrappers
+## KafkaClientFactory for Consumers and Producers
 
 Provide an instance of class KafkaClientFactory to run a Consumer or a Producer.<br>
 The KafkaClientFactory can be instantiated as POJO, for example map a JSON onto it.
