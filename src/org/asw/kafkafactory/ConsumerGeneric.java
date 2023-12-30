@@ -131,7 +131,7 @@ public class ConsumerGeneric<V> {
 	
 	/**
 	 * Set the timer (how long should the subscriber loop before it stops
-	 * 
+	 * @return instance of ConsumerGeneric
 	 * @param t typeTimer
 	 */
 	public ConsumerGeneric<V> setTimer(typeTimer t) {
