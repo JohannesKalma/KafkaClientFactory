@@ -36,7 +36,7 @@ public class ConsumerGeneric<V> {
 	public ConsumerGeneric(KafkaClientFactory cf) {
     this.cf = cf;
     this.errorCount = 0;
-    setTimer(typeTimer.MINUTE_MILLIS);
+    setTimer(typeTimer.DAY_MILLIS);
     this.kafkaConsumer = new KafkaConsumer<String,V>(this.cf.getProperties());
 	}
 	
@@ -48,15 +48,21 @@ public class ConsumerGeneric<V> {
 		doPrintValues=true;
 		return this;
 	}
-	
+	/**
+	 * 1. when seek, then no timer (value=0), subscriber should then iterate exactly once (while loop)
+	 * 2. when subscriber, look eternaly (24 hours).
+	 * 
+	 * @return boolean 
+	 */
 	private boolean keepIterating() {
+		System.out.println(iterator);
 		boolean i = false;
 		if (this.timer==0) {
       i = iterator < 1; 	  	
-	  } else {
+      iterator++;
+		} else {
 	  	i = System.currentTimeMillis() - this.startTime <= this.timer;
 	  }
-		iterator++;
 		return i;
 	}
 	
@@ -96,16 +102,39 @@ public class ConsumerGeneric<V> {
 	public ConsumerGeneric<V> subscribe() throws Exception {
 		this.doCommit=true;
 		kafkaConsumer.subscribe(Arrays.asList(cf.getTopic()));
-    //setTimer(typeTimer.DAY_MILLIS);
-		//setTimer(typeTimer.ZERO);
 		return start();
 	}
 	
-	private enum typeTimer{
-		ZERO,DAY_MILLIS,MINUTE_MILLIS;
+	/**
+	 * 
+	 * enum timeTimer
+	 *
+	 */
+	public enum typeTimer{
+		/**
+		 * ZERO = 0, do not iterate (seek)
+		 */
+		ZERO,
+		/**
+		 * DAY_MILLIS, iterate for 24 hours
+		 */
+		DAY_MILLIS,
+		/**
+		 * HOUR_MILLIS, Iterate for 1 hour
+		 */
+    HOUR_MILLIS,
+		/**
+		 * MINUT_MILLIS, iterate for 1 minute
+		 */
+		MINUTE_MILLIS;
 	}
 	
-	private void setTimer(typeTimer t) {
+	/**
+	 * Set the timer (how long should the subscriber loop before it stops
+	 * 
+	 * @param t typeTimer
+	 */
+	public ConsumerGeneric<V> setTimer(typeTimer t) {
 		switch(t) {
 		case ZERO:
 		  this.timer=0;
@@ -113,12 +142,17 @@ public class ConsumerGeneric<V> {
 		case DAY_MILLIS:
 			this.timer=1000 * 60 * 60 * 24;
 			break;
+		case HOUR_MILLIS:
+			this.timer=1000 * 60 * 60;
+			break;
 		case 	MINUTE_MILLIS:
 			this.timer= 1000 * 60;
 			break;
 		default:
 			this.timer=0;
 		}
+		
+		return this;
 	}
 	
 	/**
