@@ -12,8 +12,7 @@ Examples of Instances:
 Produce a message on a topic and print the propertie,parameters and metadata of the published message
 ```
 PrintWriter pw = new PrintWriter(System.out,true);
-KafkaClientFactory cf = new KafakClientFactory()
-                        .setBootstrapServers("host1:9095,host2:9095,host3:9095")
+KafkaClientFactory cf = new KafakClientFactory().setBootstrapServers("host1:9095,host2:9095,host3:9095")
 				                .setBootstrapServersCredentials(new Credentials("username","passwarod"))
 				                .setTopic("myTopic")
 				                .setValue("this is the message")
