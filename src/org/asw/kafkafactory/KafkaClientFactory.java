@@ -143,11 +143,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set typeDeSer<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param typeDeSer enum typeDeSer
 	 */
-	public void setTypeDeSer(typeDeSer typeDeSer) {
+	public KafkaClientFactory setTypeDeSer(typeDeSer typeDeSer) {
 		this.typeDeSer = typeDeSer;
+		return this;
 	}
 
 	/**
@@ -161,11 +162,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set schemaRegistryURL<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param schemaRegistryURL String
 	 */
-	public void setSchemaRegistryURL(String schemaRegistryURL) {
+	public KafkaClientFactory setSchemaRegistryURL(String schemaRegistryURL) {
 		this.schemaRegistryURL = schemaRegistryURL;
+		return this;
 	}
 
 	/**
@@ -180,10 +182,12 @@ public class KafkaClientFactory {
 	/**
 	 * set object schemaRegistryCredentials
 	 * 
+	 * @return intance of KafkaClientFactory
 	 * @param schemaRegistryCredentials Credentials
 	 */
-	public void setSchemaRegistryCredentials(Credentials schemaRegistryCredentials) {
+	public KafkaClientFactory setSchemaRegistryCredentials(Credentials schemaRegistryCredentials) {
 		this.schemaRegistryCredentials = schemaRegistryCredentials;
+		return this;
 	}
 
 	/**
@@ -197,11 +201,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set groupId<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param groupId String
 	 */
-	public void setGroupId(String groupId) {
+	public KafkaClientFactory setGroupId(String groupId) {
 		this.groupId = groupId;
+		return this;
 	}
 
 	/**
@@ -215,11 +220,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set bootstrapServers (a list of brokers)<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServers STring
 	 */
-	public void setBootstrapServers(String bootstrapServers) {
+	public KafkaClientFactory setBootstrapServers(String bootstrapServers) {
 		this.bootstrapServers = bootstrapServers;
+		return this;
 	}
 
 	/**
@@ -233,11 +239,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set instance of bootstrapServersCredentials<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServersCredentials Credentials
 	 */
-	public void setBootstrapServersCredentials(Credentials bootstrapServersCredentials) {
+	public KafkaClientFactory setBootstrapServersCredentials(Credentials bootstrapServersCredentials) {
 		this.bootstrapServersCredentials = bootstrapServersCredentials;
+		return this;
 	}
 
 	/**
@@ -255,11 +262,12 @@ public class KafkaClientFactory {
 	 * get bootstrapServerTruststoreCertificate<br>
 	 * <br>
 	 * This is also known as the PEM Certificate Document
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param bootstrapServerTruststoreCertificate String
 	 */
-	public void setBootstrapServerTruststoreCertificate(String bootstrapServerTruststoreCertificate) {
+	public KafkaClientFactory setBootstrapServerTruststoreCertificate(String bootstrapServerTruststoreCertificate) {
 		this.bootstrapServerTruststoreCertificate = bootstrapServerTruststoreCertificate;
+		return this;
 	}
 
 	/**
@@ -273,11 +281,12 @@ public class KafkaClientFactory {
 
 	/**
 	 * set Kafka topic<br>
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param topic String
 	 */
-	public void setTopic(String topic) {
+	public KafkaClientFactory setTopic(String topic) {
 		this.topic = topic;
+		return this;
 	}
 
 	/**
@@ -294,10 +303,12 @@ public class KafkaClientFactory {
 	 * set className<br>
 	 * The DTO needed for AVRO (de)serializing
 	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param className String
 	 */
-	public void setClassName(String className) {
+	public KafkaClientFactory setClassName(String className) {
 		this.className = className;
+		return this;
 	}
 
 	/**
@@ -313,10 +324,12 @@ public class KafkaClientFactory {
 	 * set partition<br>
 	 * partition needed to seek a message
 	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param partition String
 	 */
-	public void setPartition(String partition) {
+	public KafkaClientFactory setPartition(String partition) {
 		this.partition = partition;
+		return this;
 	}
 
 	/**
@@ -331,12 +344,14 @@ public class KafkaClientFactory {
 
 	/**
 	 * set offset
-	 * offst needed to seek a message
-	 * 
+	 * offset needed to seek a message
+	 
+	 * @return instance of KafkaClientFactory
 	 * @param offset String
 	 */
-	public void setOffset(String offset) {
+	public KafkaClientFactory setOffset(String offset) {
 		this.offset = offset;
+		return this;
 	}
 
 	/**
@@ -352,11 +367,12 @@ public class KafkaClientFactory {
 	/**
 	 * set value<br>
 	 * value parsed as Kafka message
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param value String
 	 */
-	public void setValue(String value) {
+	public KafkaClientFactory setValue(String value) {
 		this.value = value;
+		return this;
 	}
 
 	/**
@@ -372,11 +388,12 @@ public class KafkaClientFactory {
 	/**
 	 * set key
 	 * According to Kafka documentation, optional, but in this setting mandatory
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param key String
 	 */
-	public void setKey(String key) {
+	public KafkaClientFactory setKey(String key) {
 		this.key = key;
+		return this;
 	}
 
 	/**
@@ -392,11 +409,12 @@ public class KafkaClientFactory {
 	/**
 	 * set jdbcUrl<br>
 	 * For dataprocessing
-	 * 
+	 * @return instance of KafkaClientFactory
 	 * @param jdbcUrl String
 	 */
-	public void setJdbcUrl(String jdbcUrl) {
+	public KafkaClientFactory setJdbcUrl(String jdbcUrl) {
 		this.jdbcUrl = jdbcUrl;
+		return this;
 	}
 
 	/**
@@ -411,10 +429,12 @@ public class KafkaClientFactory {
 	/**
 	 * set object of jdbcCredentials<br>
 	 * For dataprocessing
+	 * @return instance of KafkaClientFactory
 	 * @param jdbcCredentials Credentials
 	 */
-	public void setJdbcCredentials(Credentials jdbcCredentials) {
+	public KafkaClientFactory setJdbcCredentials(Credentials jdbcCredentials) {
 		this.jdbcCredentials = jdbcCredentials;
+		return this;
 	}
 
 	/**
@@ -435,11 +455,13 @@ public class KafkaClientFactory {
 	 *  
 	 *  <p>for the producer (ref cursor):<br>
 	 *  - for a producer, a ref cursor is implied [FUNCTION_NAME returning a ref cursor]</p>
-	 *  
+	 * 
+	 * @return instance of KafkaClientFactory 
 	 * @param jdbcQuery String
 	 */
-	public void setJdbcQuery(String jdbcQuery) {
+	public KafkaClientFactory setJdbcQuery(String jdbcQuery) {
 		this.jdbcQuery = String.format("BEGIN %s; END;",jdbcQuery);
+	  return this;
 	}
 
 	
@@ -447,16 +469,18 @@ public class KafkaClientFactory {
 	 * set a JDBC connection for factory url and credentials<br>
 	 * result is a Connection value
 	 * 
+	 * @return instance of KafkaClientFactory
 	 * @throws ClassNotFoundException --
 	 * @throws SQLException --
 	 */
-	public void setJdbcConnection() throws ClassNotFoundException, SQLException {
+	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
 			if (KafkaUtil.isNotBlank(getJdbcUrl())) {
 				Class.forName("oracle.jdbc.OracleDriver");
 				this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(), getJdbcCredentials().getPassword());
 				printDatabaseMetaData();
 			}
 		  print("Connection "+connection.toString());
+		  return this;
 	}
 	
 	/**
