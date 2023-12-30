@@ -14,12 +14,12 @@ Produce a message on a topic and print the propertie,parameters and metadata of 
 PrintWriter pw = new PrintWriter(System.out,true);
 KafkaClientFactory cf = new KafkaClientFactory().setBootstrapServers("host1:9095,host2:9095,host3:9095")
                                                 .setBootstrapServersCredentials(new Credentials("username","passwarod"))
-						.setTypeDeSer(typeDeSer.STRINGSER)
-						.setTopic("myTopic")
-						.setValue("this is the message")
-						.setPrintwriter(pw)
-						.printProperties()
-						.printParameters();
+                                                .setTypeDeSer(typeDeSer.STRINGSER)
+                                                .setTopic("myTopic")
+                                                .setValue("this is the message")
+                                                .setPrintwriter(pw)
+                                                .printProperties()
+                                                .printParameters();
 
 new Producer(cf).publish().printMetadata();
 ```
