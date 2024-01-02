@@ -61,7 +61,6 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * - jdbcUrl {@link String}<br>
  * - jdbcCredentials {@link Credentials}<br>
  * - jdbcQuery String<br>
- * 
  */
 public class KafkaClientFactory {
 	String bootstrapServers;
