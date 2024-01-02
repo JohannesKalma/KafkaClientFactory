@@ -28,9 +28,11 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 public class Producer {
 
 	private RecordMetadata recordMetadata;
-	private KafkaClientFactory cf;
+	private KafkaClientFactory kafkaClientFactory;
   private Connection connection;
-  private PrintWriter p;
+
+
+	private PrintWriter p;
   
 	KafkaProducer<String,SpecificRecord> kafkaProducerAVRO;
 	KafkaProducer<String,String> kafkaProducerString;
@@ -64,7 +66,7 @@ public class Producer {
 	 * @throws Exception generic exception
 	 */
 	public Producer(KafkaClientFactory cf) throws Exception {
-		this.cf = cf;
+		this.kafkaClientFactory = cf;
     if (cf.publishValue() instanceof String) {
       	KafkaProducer<String,String> kafkaProducer = new KafkaProducer<String,String>(cf.getProperties());
 				this.kafkaProducerString = kafkaProducer;
@@ -76,25 +78,28 @@ public class Producer {
     }
 	}
 	
+	
+	
+	
 	/**
 	 * publish a message on instance of class
 	 * @return Producer instance
 	 * @throws Exception generic exception
 	 */
 	public Producer publish() throws Exception {
-		if (cf.publishValue() != null) {
-			if (cf.publishValue() instanceof SpecificRecord) {
-		  	this.recordMetadata=this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(cf.getTopic(),cf.getKey(),(SpecificRecord)cf.publishValue())).get();		
+		if (kafkaClientFactory.publishValue() != null) {
+			if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
+		  	this.recordMetadata=this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(),kafkaClientFactory.getKey(),(SpecificRecord)kafkaClientFactory.publishValue())).get();		
 		  	kafkaProducerAVRO.close();
 			}			
-			if (cf.publishValue() instanceof String) {
-	    	this.recordMetadata=this.kafkaProducerString.send(new ProducerRecord<String, String>(cf.getTopic(),cf.getKey(),(String)cf.publishValue())).get();
+			if (kafkaClientFactory.publishValue() instanceof String) {
+	    	this.recordMetadata=this.kafkaProducerString.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(),kafkaClientFactory.getKey(),(String)kafkaClientFactory.publishValue())).get();
 	    	kafkaProducerString.close();
 	    }
 			this.closeKafkaProducers();
 		} 
 		
-		if (KafkaUtil.isNotBlank(cf.getJdbcQuery())) {
+		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery())) {
     	publishFromRefCursor();
     }
 
@@ -107,11 +112,11 @@ public class Producer {
 	}
 	
 	private Producer publishWithCallback(String messageId) throws Exception {
-		if (cf.publishValue() instanceof SpecificRecord) {
-	  	this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(cf.getTopic(),cf.getKey(),(SpecificRecord)cf.publishValue()),new ProducerCallback(messageId));		
+		if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
+	  	this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(),kafkaClientFactory.getKey(),(SpecificRecord)kafkaClientFactory.publishValue()),new ProducerCallback(messageId));		
 		}			
-		if (cf.publishValue() instanceof String) {
-    	this.kafkaProducerString.send(new ProducerRecord<String, String>(cf.getTopic(),cf.getKey(),(String)cf.publishValue()),new ProducerCallback(messageId));
+		if (kafkaClientFactory.publishValue() instanceof String) {
+    	this.kafkaProducerString.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(),kafkaClientFactory.getKey(),(String)kafkaClientFactory.publishValue()),new ProducerCallback(messageId));
     }
 		return this;
 	}
@@ -133,9 +138,9 @@ public class Producer {
 	}
 	
 	private Producer publishFromRefCursor() throws Exception {
-    connection = cf.jdbcConnection();
+    connection = kafkaClientFactory.jdbcConnection();
     
-  	CallableStatement stmt = this.connection.prepareCall ("{ ? = call " + cf.getJdbcQuery()  + " }");
+  	CallableStatement stmt = this.connection.prepareCall ("{ ? = call " + kafkaClientFactory.getJdbcQuery()  + " }");
     stmt.registerOutParameter (1,Types.REF_CURSOR);
   	stmt.execute();
     
@@ -150,9 +155,9 @@ public class Producer {
        //String key   = rset.getString (3);
        //String value = rset.getString (4);
 
-       cf.setTopic(rset.getString (2));
-       cf.setKey(rset.getString (3));
-       cf.setValue(rset.getString (4));
+       kafkaClientFactory.setTopic(rset.getString (2));
+       kafkaClientFactory.setKey(rset.getString (3));
+       kafkaClientFactory.setValue(rset.getString (4));
        
        this.publishWithCallback(id);
      }
@@ -178,7 +183,7 @@ public class Producer {
 	 * @return KafkaPublisher instance
 	 */
 	public Producer printMetadata() {
-		return printMetadata(cf.getPrintwriter());
+		return printMetadata(kafkaClientFactory.getPrintwriter());
 	}
 	
 	/**
@@ -197,4 +202,5 @@ public class Producer {
 		print(String.format("timestamp: %s",this.recordMetadata.timestamp()));
 		return this;
 	}
+
 }
