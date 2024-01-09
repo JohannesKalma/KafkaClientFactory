@@ -34,8 +34,8 @@ public class SchemaDTOBuilder {
 	String baseDirString;
 	File baseDir;
 	String schemaName;
-  String namespace;
-	
+	String namespace;
+
 	public String getTopic() {
 		return topic;
 	}
@@ -67,11 +67,11 @@ public class SchemaDTOBuilder {
 			r = this.schemaRegistryClient.getLatestSchemaMetadata(top).getSchema();
 			break;
 		}
-		//System.out.println(r);
+		// System.out.println(r);
 		Schema schema = new Schema.Parser().parse(r);
 		String t = String.valueOf(System.currentTimeMillis());
 		this.schemaName = schema.getName();
-		this.namespace=schema.getNamespace();
+		this.namespace = schema.getNamespace();
 		this.baseDirString = System.getProperty("java.io.tmpdir") + File.separator + this.schemaName + "_" + t;
 		this.baseDir = new File(baseDirString);
 		this.srcDir = new File(baseDir + "/src");
@@ -105,7 +105,7 @@ public class SchemaDTOBuilder {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		return manifest;
 	}
-
+	
 	public void createJar() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
@@ -113,7 +113,7 @@ public class SchemaDTOBuilder {
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(jarFile);
 				JarOutputStream jarOutputStream = new JarOutputStream(fileOutputStream, getManifest())) {
-			
+
 			Files.walk(sourcePath).filter(Files::isRegularFile).forEach(file -> {
 				try {
 					String entryName = sourcePath.relativize(file).toString().replace(File.separator, "/");
