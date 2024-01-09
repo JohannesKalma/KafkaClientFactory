@@ -13,12 +13,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Credentials {
 
 	private String userName;
-	
+
 	@JsonProperty
 	private String password;
-	
-	/** 
-	 * Get the UserName. This method return a String containing the username when set.
+
+	/**
+	 * Get the UserName. This method return a String containing the username when
+	 * set.
 	 * 
 	 * @return The Username
 	 */
@@ -29,14 +30,15 @@ public class Credentials {
 	/**
 	 * Set the UserName
 	 * 
-	 * @param userName String 
+	 * @param userName String
 	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
-	/** 
-	 * Get the password. This method returns a String containing the (unencrypted) password when set.
+	/**
+	 * Get the password. This method returns a String containing the (unencrypted)
+	 * password when set.
 	 * 
 	 * @return The password
 	 */
@@ -45,7 +47,7 @@ public class Credentials {
 		return password;
 	}
 
-	/** 
+	/**
 	 * Set the Password
 	 * 
 	 * @param password String
@@ -55,18 +57,19 @@ public class Credentials {
 	}
 
 	/**
-	 *  Constructor - Credentials()
+	 * Constructor - Credentials()
 	 */
 	public Credentials() {
 	}
 
 	/**
-	 * Constructor - Credentials(String userName, String password)<p>
+	 * Constructor - Credentials(String userName, String password)
+	 * <p>
 	 * 
 	 * Set the userName and the password when class is initialized
 	 * 
-	 * @param userName String 
-	 * @param password String 
+	 * @param userName String
+	 * @param password String
 	 */
 	public Credentials(String userName, String password) {
 		this.userName = userName;

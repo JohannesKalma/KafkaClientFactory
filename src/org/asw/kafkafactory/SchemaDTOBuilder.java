@@ -105,7 +105,7 @@ public class SchemaDTOBuilder {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		return manifest;
 	}
-	
+
 	public void createJar() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 

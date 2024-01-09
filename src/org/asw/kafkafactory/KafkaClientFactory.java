@@ -33,22 +33,29 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * It contains all values needed for the connection to any kafka server (for
  * example the bootstrapServer for a list of brokers).<br>
  *
- * Advice is to <i>not</i> explicitly set the values, but instead use an ObjectMapper (like
- * Jackson) and then only configure it with those values that are needed for your
- * subscriber or consumer.<br>
- * One such mapper is the JobParameterMap, that can be used as bridge for RunMyJobs scheduled Kafka processes<br>
- *<br>
- * Examples of usages:
- * - When the message is String serialized, then there is no need to use a schema server. In that case just leave out about the schemaRegistryURL and schemaRegistryCredentials.<br>
- * - When the message needs some AVRO serializing, then the schemaRegistryUrl , Credential and className for the (de)serialzing are interesting variables.<br>
- * - For a subscriber the value is not needed instead the 3 jdbc values might be of interest, to configure a jdbc class that can be used to send a formatted jdbcQuery.<br>
+ * Advice is to <i>not</i> explicitly set the values, but instead use an
+ * ObjectMapper (like Jackson) and then only configure it with those values that
+ * are needed for your subscriber or consumer.<br>
+ * One such mapper is the JobParameterMap, that can be used as bridge for
+ * RunMyJobs scheduled Kafka processes<br>
+ * <br>
+ * Examples of usages: - When the message is String serialized, then there is no
+ * need to use a schema server. In that case just leave out about the
+ * schemaRegistryURL and schemaRegistryCredentials.<br>
+ * - When the message needs some AVRO serializing, then the schemaRegistryUrl ,
+ * Credential and className for the (de)serialzing are interesting
+ * variables.<br>
+ * - For a subscriber the value is not needed instead the 3 jdbc values might be
+ * of interest, to configure a jdbc class that can be used to send a formatted
+ * jdbcQuery.<br>
  * <br>
  * The typeDeSer is mandatory, to tell the client what kind of (de)serializer
  * must be used.<br>
  * DTO fields that can be used for mapping:<br>
  * - bootstrapServers {@link String} (list of brokers)<br>
  * - bootstrapServersCredentials {@link Credentials}<br>
- * - bootstrapServerTruststoreCertificate {@link String} (the PEM Certificate Document)<br>
+ * - bootstrapServerTruststoreCertificate {@link String} (the PEM Certificate
+ * Document)<br>
  * - schemaRegistrycredentials {@link Credentials}<br>
  * - schemaRegistryURL {@link String}<br>
  * - typeDeSer {@link typeDeSer} - groupId {@link String}<br>
@@ -570,9 +577,9 @@ public class KafkaClientFactory {
 	 */
 	public Properties getProperties() {
 		Properties properties = new Properties();
-    
+
 		if (KafkaUtil.isNotBlank(this.getBootstrapServers())) {
-		  properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, this.getBootstrapServers());
+			properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, this.getBootstrapServers());
 		}
 
 		if (this.getBootstrapServersCredentials() != null) {
@@ -617,7 +624,7 @@ public class KafkaClientFactory {
 				//
 			}
 		}
-		
+
 		if (KafkaUtil.isNotBlank(this.getSchemaRegistryURL())) {
 			properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, this.getSchemaRegistryURL());
 			if (this.getSchemaRegistryCredentials() != null) {
