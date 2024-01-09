@@ -27,6 +27,12 @@
 			<artifactId>kafka-connect-avro-converter</artifactId>
 			<version>7.5.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.avro/avro-compiler -->
+		<dependency>
+		    <groupId>org.apache.avro</groupId>
+		    <artifactId>avro-compiler</artifactId>
+		    <version>1.11.3</version>
+		</dependency>
 		<!--  https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10  -->
 		<dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
