@@ -6,14 +6,14 @@
 	<name>KafkaFactory</name>
 	<description>Kafka Factory Consumer and Producer Wrapper and DTO builder</description>
 	<packaging>jar</packaging>
-	
+
 	<repositories>
 		<repository>
 			<id>confluent</id>
 			<url>https://packages.confluent.io/maven/</url>
 		</repository>
 	</repositories>
-	
+
 	<dependencies>
 		<!--  https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind  -->
 		<dependency>
@@ -29,9 +29,9 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.avro/avro-compiler -->
 		<dependency>
-		    <groupId>org.apache.avro</groupId>
-		    <artifactId>avro-compiler</artifactId>
-		    <version>1.11.3</version>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro-compiler</artifactId>
+			<version>1.11.3</version>
 		</dependency>
 		<!--  https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10  -->
 		<dependency>
@@ -60,6 +60,20 @@
 				<configuration>
 					<release>11</release>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
