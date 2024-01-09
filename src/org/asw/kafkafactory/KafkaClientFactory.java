@@ -562,21 +562,6 @@ public class KafkaClientFactory {
 		}
 	}
 
-	private Properties schemaRegistryProperties() {
-		Properties properties = new Properties();
-
-		if (this.getSchemaRegistryURL() != null) {
-			properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, this.getSchemaRegistryURL());
-			if (this.getSchemaRegistryCredentials() != null) {
-				properties.put(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
-				properties.put(SchemaRegistryClientConfig.USER_INFO_CONFIG, String.format("%s:%s",
-						this.getSchemaRegistryCredentials().getUserName(), this.getSchemaRegistryCredentials().getPassword()));
-			}
-		}
-
-		return properties;
-	}
-
 	/**
 	 * This is not part of the DTO, it's the result of the KafkaClientFactory DTO
 	 * values needed for instantiating a Kafka client.
@@ -585,8 +570,10 @@ public class KafkaClientFactory {
 	 */
 	public Properties getProperties() {
 		Properties properties = new Properties();
-
-		properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, this.getBootstrapServers());
+    
+		if (KafkaUtil.isNotBlank(this.getBootstrapServers())) {
+		  properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, this.getBootstrapServers());
+		}
 
 		if (this.getBootstrapServersCredentials() != null) {
 			// SASL_SSL
@@ -605,30 +592,39 @@ public class KafkaClientFactory {
 		if (KafkaUtil.isNotBlank(this.getGroupId()))
 			properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, this.getGroupId());
 
-		switch (getTypeDeSer()) {
-		case AVROSER:
-			properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-			properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
-			properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-			properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-			properties.putAll(schemaRegistryProperties());
-			break;
-		case AVRODES:
-			properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
-			properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
-			properties.putAll(schemaRegistryProperties());
-			break;
-		case STRINGSER:
-			properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-			properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-			break;
-		case STRINGDES:
-			properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-			properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-			break;
-		default:
-			//
+		if (getTypeDeSer() != null) {
+			switch (getTypeDeSer()) {
+			case AVROSER:
+				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
+				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+				break;
+			case AVRODES:
+				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
+				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
+				break;
+			case STRINGSER:
+				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				break;
+			case STRINGDES:
+				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				break;
+			default:
+				//
+			}
+		}
+		
+		if (KafkaUtil.isNotBlank(this.getSchemaRegistryURL())) {
+			properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, this.getSchemaRegistryURL());
+			if (this.getSchemaRegistryCredentials() != null) {
+				properties.put(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+				properties.put(SchemaRegistryClientConfig.USER_INFO_CONFIG, String.format("%s:%s",
+						this.getSchemaRegistryCredentials().getUserName(), this.getSchemaRegistryCredentials().getPassword()));
+			}
 		}
 
 		return properties;
