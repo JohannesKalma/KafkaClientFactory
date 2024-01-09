@@ -113,8 +113,6 @@ public class SchemaDTOBuilder {
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(jarFile);
 				JarOutputStream jarOutputStream = new JarOutputStream(fileOutputStream, getManifest())) {
-
-			//Files.isRegularFile(sourcePath, null)
 			
 			Files.walk(sourcePath).filter(Files::isRegularFile).forEach(file -> {
 				try {
