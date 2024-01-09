@@ -3,6 +3,7 @@ package org.asw.kafkafactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 
 public class SchemaDTOBuilder {
 
+	KafkaClientFactory cf;
 	SchemaRegistryClient schemaRegistryClient;
 	Properties prop;
 	String topic;
@@ -35,7 +37,8 @@ public class SchemaDTOBuilder {
 	File baseDir;
 	String schemaName;
 	String namespace;
-
+  PrintWriter pw;
+	
 	public String getTopic() {
 		return topic;
 	}
@@ -49,8 +52,10 @@ public class SchemaDTOBuilder {
 	}
 
 	public SchemaDTOBuilder schemaRegistryClient(KafkaClientFactory cf) {
+		this.cf = cf;
 		this.prop = cf.getProperties();
 		this.topic = cf.getTopic();
+		this.pw = cf.getPrintwriter();
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Map<String, String> propMap = (Map) prop;
 		schemaRegistryClient = new CachedSchemaRegistryClient((String) prop.get("schema.registry.url"), 10000, propMap);
@@ -126,6 +131,6 @@ public class SchemaDTOBuilder {
 				}
 			});
 		}
-		System.out.println(jarFile.getPath());
+		cf.print(jarFile.getPath());
 	}
 }
