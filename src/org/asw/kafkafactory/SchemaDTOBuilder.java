@@ -25,7 +25,13 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
+/**
+ * Tools to build a DTO jar from a topic linked schema from a schema server.
+ * @author JKALMA
+ *
+ */
 public class SchemaDTOBuilder {
 
 	KafkaClientFactory cf;
@@ -38,21 +44,37 @@ public class SchemaDTOBuilder {
 	String schemaName;
 	String namespace;
   PrintWriter pw;
+  String schema;
 	
-	public String getTopic() {
-		return topic;
-	}
-
+  /**
+   * Topic from schedulingserver the DTO should be based on
+   * @param topic - topic name
+   * @return instance of SchemaDTOBuilder 
+   */
 	public SchemaDTOBuilder setTopic(String topic) {
 		this.topic = topic;
 		return this;
 	}
-
+  
+	/**
+	 * constructor
+	 */
 	public SchemaDTOBuilder() {
 	}
 
-	public SchemaDTOBuilder schemaRegistryClient(KafkaClientFactory cf) {
-		this.cf = cf;
+	/**
+	 * initiate a client to the schemaRegistry server
+	 * 
+	 * Instantiate the KafkaClientFactory with:<br>
+	 * the schemaRegistryURL<br>
+	 * the schemaRegistrycredentials {@link Credentials}<br>
+   * and a topic<br>
+	 * 
+	 * @param kafkaClientFactory - instance of KafkaClientFactory 
+	 * @return instance of SchemaDTOBuilder 
+	 */
+	public SchemaDTOBuilder schemaRegistryClient(KafkaClientFactory kafkaClientFactory) {
+		this.cf = kafkaClientFactory;
 		this.prop = cf.getProperties();
 		this.topic = cf.getTopic();
 		this.pw = cf.getPrintwriter();
@@ -62,18 +84,44 @@ public class SchemaDTOBuilder {
 
 		return this;
 	}
-
+	
+	/**
+	 * get the schema from latest topic schema metadata
+	 * @return instance of SchemaDTOBuilder 
+	 * @throws Exception generic Exception
+	 */
+	public SchemaDTOBuilder setSchemaFromTopic() throws Exception {
+		//List<String> topicList = new ArrayList<>();
+		//topicList.add(this.topic + "-value");
+    String topic = this.topic + "-value";
+    this.schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema();
+    
+		//for (String topic : topicList) {
+		//	this.schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema();
+		//	break;
+		//}
+    return this;
+	}
+	
+	/**
+	 * set manually a schema for instance of SchemaDTOBuilder
+	 * @param schema String
+	 * @return instance of SchemaDTOBuilder
+	 */
+	public SchemaDTOBuilder setSchema(String schema) {
+		this.schema = schema;
+		return this;
+	}
+	
+  /**
+   * get the schema from the registy server for a topic and write java sources of a DTO in the system temp folder
+   * 
+   * @return instance of SchemaDTOBuilder 
+   * @throws Exception generic exception
+   */
 	public SchemaDTOBuilder buildDTOsrc() throws Exception {
-		List<String> topics = new ArrayList<>();
-		topics.add(this.topic + "-value");
-		String r = null;
-
-		for (String top : topics) {
-			r = this.schemaRegistryClient.getLatestSchemaMetadata(top).getSchema();
-			break;
-		}
 		// System.out.println(r);
-		Schema schema = new Schema.Parser().parse(r);
+		Schema schema = new Schema.Parser().parse(this.schema);
 		String t = String.valueOf(System.currentTimeMillis());
 		this.schemaName = schema.getName();
 		this.namespace = schema.getNamespace();
@@ -89,7 +137,15 @@ public class SchemaDTOBuilder {
 
 		return this;
 	}
+	
+	
 
+	/**
+	 * compile the java sources into binary classes
+	 * 
+	 * @return instance of SchemaDTOBuilder 
+	 * @throws Exception - generic exception
+	 */
 	public SchemaDTOBuilder compileDTOclasses() throws Exception {
 		Path root = Path.of(this.srcDir.toURI());
 		List<Path> paths = new ArrayList<>();
@@ -105,12 +161,16 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 
-	public static Manifest getManifest() {
+	private static Manifest getManifest() {
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		return manifest;
 	}
-
+  /**
+   * Write all sources and compiled classes into a valid jar file with a standard MANIFEST
+   * 
+   * @throws Exception - generic Exception
+   */
 	public void createJar() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
