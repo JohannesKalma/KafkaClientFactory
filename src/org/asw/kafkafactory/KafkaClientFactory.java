@@ -554,7 +554,9 @@ public class KafkaClientFactory {
 	}
 
 	/**
-	 * This is not part of the DTO, it's being called from the publisher
+	 * This is not part of the DTO, it's being called from the publisher<br>
+	 * When publisher is in AVROSER mode, then return a specificRecord object else the value as String.<br>
+	 * This method is not for general use.
 	 * 
 	 * @return if AVROSER object of type {@link #specificRecord()} else Object of
 	 *         type {@link #getValue()} {@link String}
