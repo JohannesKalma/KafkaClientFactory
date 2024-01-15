@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Credentials provides a Username and a Password<br>
- * It's a DTO for all KafkaClientFactory credentials<br>
- * DTO values for mapping:<br>
+ * DTO for all KafkaClientFactory credentials<br>
+ * values for mapping:<br>
  * - userName {@link String}<br>
  * - passWord {@link String}<br>
  */
