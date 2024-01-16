@@ -482,7 +482,8 @@ public class KafkaClientFactory {
 	 * @param jdbcQuery String
 	 */
 	public KafkaClientFactory setJdbcQuery(String jdbcQuery) {
-		this.jdbcQuery = String.format("BEGIN %s; END;", jdbcQuery);
+		//this.jdbcQuery = String.format("BEGIN %s; END;", jdbcQuery);
+		this.jdbcQuery = jdbcQuery;
 		return this;
 	}
 
