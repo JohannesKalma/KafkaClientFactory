@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.asw.kafkafactory.KafkaClientFactory.typeDeSer;
 
 /**
  * publish a message on a instance of a KafkaProducer<br>
@@ -76,12 +77,15 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory cf) throws Exception {
 		this.kafkaClientFactory = cf;
-		if (cf.publishValue() instanceof String) {
+		//if (cf.publishValue() instanceof String) {
+		if(typeDeSer.STRINGSER.equals(cf.getTypeDeSer())) {
+			System.out.print("Instance of String");
 			KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(cf.getProperties());
 			this.kafkaProducerString = kafkaProducer;
 		}
 
-		if (cf.publishValue() instanceof SpecificRecord) {
+		//if (cf.publishValue() instanceof SpecificRecord) {
+		if(typeDeSer.AVROSER.equals(cf.getTypeDeSer())) {	
 			KafkaProducer<String, SpecificRecord> kafkaProducer = new KafkaProducer<String, SpecificRecord>(
 					cf.getProperties());
 			this.kafkaProducerAVRO = kafkaProducer;
@@ -150,6 +154,7 @@ public class Producer {
 
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
+			System.out.println(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
 			if (e != null) {
 				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %%s%n",
 						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
@@ -171,14 +176,11 @@ public class Producer {
 
 				BigDecimal bdid = rset.getBigDecimal(1);
 				String id = bdid.toString();
-				// String topic = rset.getString (2);
-				// String key = rset.getString (3);
-				// String value = rset.getString (4);
 
 				kafkaClientFactory.setTopic(rset.getString(2));
 				kafkaClientFactory.setKey(rset.getString(3));
 				kafkaClientFactory.setValue(rset.getString(4));
-
+				
 				this.publishWithCallback(id);
 			}
 
