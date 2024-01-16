@@ -1,7 +1,9 @@
 package org.asw.kafkafactory;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -58,7 +60,6 @@ public class ConsumerGeneric<V> {
 	 * @return boolean
 	 */
 	private boolean keepIterating() {
-		System.out.println(iterator);
 		boolean i = false;
 		if (this.timer == 0) {
 			i = iterator < 1;
@@ -186,8 +187,8 @@ public class ConsumerGeneric<V> {
 	 */
 	public void processData(String value) throws Exception {
 		if (cf.jdbcConnection() != null && KafkaUtil.isNotBlank(cf.getJdbcQuery())) {
-			String query = cf.getJdbcQuery();
-			try (PreparedStatement stmt = cf.jdbcConnection().prepareStatement(query)) {
+	
+			try(CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")){
 				stmt.setString(1, value);
 				stmt.execute();
 			} catch (SQLException e) {
