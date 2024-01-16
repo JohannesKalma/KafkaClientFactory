@@ -1,9 +1,7 @@
 package org.asw.kafkafactory;
 
 import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
