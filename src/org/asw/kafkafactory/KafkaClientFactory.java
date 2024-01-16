@@ -451,7 +451,15 @@ public class KafkaClientFactory {
 		this.jdbcCredentials = jdbcCredentials;
 		return this;
 	}
-
+	
+	/*
+	 * Jackson DTO mapper fails on this one. 
+	 *public KafkaClientFactory setJdbcCredentials(String jdbcCredentialsJson) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		this.jdbcCredentials = objectMapper.readValue(jdbcCredentialsJson, Credentials.class);
+		return this;
+	}*/
+	
 	/**
 	 * get jdbcQuery()<br>
 	 * For dataprocessing
