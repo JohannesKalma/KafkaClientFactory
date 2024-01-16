@@ -474,8 +474,12 @@ public class KafkaClientFactory {
 	 * 
 	 * <p>
 	 * for the producer (ref cursor):<br>
-	 * - for a producer, a ref cursor is implied [FUNCTION_NAME returning a ref
-	 * cursor]
+	 * - for a producer, a function returning a ref cursor is expected [FUNCTION_NAME returning a ref
+	 * cursor]<br>
+	 * the select statement of this ref cursor must have the form: SELECT id,topic,key,value FROM ... WHERE ....<br>
+	 * <strong>id</strong> is an identifier for your query needed for the callback of the published message<br>
+	 * <strong>topic</strong> and key will be the identifiers where message will be published<br>
+	 * <strong>message</strong> is the message that will be published on a topic. 
 	 * </p>
 	 * 
 	 * @return instance of KafkaClientFactory
