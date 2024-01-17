@@ -56,7 +56,7 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * - bootstrapServersCredentials {@link Credentials}<br>
  * - bootstrapServerTruststoreCertificate {@link String} (the PEM Certificate
  * Document)<br>
- * - schemaRegistrycredentials {@link Credentials}<br>
+ * - schemaRegistryCredentials {@link Credentials}<br>
  * - schemaRegistryURL {@link String}<br>
  * - typeDeSer {@link typeDeSer} - groupId {@link String}<br>
  * - topic {@link String}<br>
@@ -387,8 +387,9 @@ public class KafkaClientFactory {
 	}
 
 	/**
-	 * get key()<br>
-	 * According to Kafka documentation, optional, but in this setting mandatory
+	 * get key()<br> 
+	 * According to Kafka documentation, optional, but in this lib
+	 * mandatory
 	 * 
 	 * @return key String
 	 */
@@ -397,7 +398,8 @@ public class KafkaClientFactory {
 	}
 
 	/**
-	 * set key According to Kafka documentation, optional, but in this setting
+	 * set key<br> 
+	 * According to Kafka documentation, optional, but in this lib
 	 * mandatory
 	 * 
 	 * @return instance of KafkaClientFactory
@@ -420,7 +422,9 @@ public class KafkaClientFactory {
 
 	/**
 	 * set jdbcUrl<br>
-	 * For dataprocessing
+	 * For dataprocessing (consumer) and dataretreiving (ref cursor for producer)<br>
+	 * must have the format jdbc:oracle:thin:@[host]:[port]:[sid]<br>
+	 * For example: jdbc:oracle:thin:@//myhost.us.example.com:1521/devdb
 	 * 
 	 * @return instance of KafkaClientFactory
 	 * @param jdbcUrl String
@@ -432,7 +436,7 @@ public class KafkaClientFactory {
 
 	/**
 	 * get object of jdbcCredentials<br>
-	 * For dataprocessing
+	 * For dataprocessing (consumer) and dataretreiving (ref cursor for producer)
 	 * 
 	 * @return jdbcCredentials Credentials
 	 */
