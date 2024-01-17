@@ -552,6 +552,7 @@ public class KafkaClientFactory {
 
 	private void printDatabaseMetaData() throws SQLException {
 		DatabaseMetaData dbmd = connection.getMetaData();
+		print("==== JDBC info ====");
 		print(String.format("Driver Name: %s", dbmd.getDriverName()));
 		print(String.format("Driver Version:  %s", dbmd.getDriverVersion()));
 		print(String.format("Database Username is:  %s", dbmd.getUserName()));
