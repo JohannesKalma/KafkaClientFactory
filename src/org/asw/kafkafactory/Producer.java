@@ -143,7 +143,7 @@ public class Producer {
 
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
-			kafkaClientFactory.print(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
+			//kafkaClientFactory.print(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
 			if (e != null) {
 				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %%s%n",
 						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
