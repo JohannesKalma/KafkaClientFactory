@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -665,7 +666,17 @@ public class KafkaClientFactory {
 	public KafkaClientFactory printProperties() {
 		return printProperties(this.getPrintwriter());
 	}
-
+  
+	private String obfuscatePrintPropertiesValue(String key,String value) {
+		String[] obfuscateKeys = {"ssl.truststore.certificates", "basic.auth.user.info", "ssl.truststore.certificates","sasl.jaas.config"};
+		String obfuscatedValue = value;
+		boolean isCredentialParameter = Arrays.stream(obfuscateKeys).anyMatch(s -> s.equals(key));
+		if (isCredentialParameter) {
+  		obfuscatedValue = "Obfuscated Property Value";
+    }
+		return obfuscatedValue;
+	}
+	
 	/**
 	 * Print generated properties for an instantiated KafkaClientFactory:<br>
 	 * 
@@ -673,13 +684,14 @@ public class KafkaClientFactory {
 	 * @return KafkaClientFactory object
 	 */
 	public KafkaClientFactory printProperties(PrintWriter p) {
-		print("==== Properties ==== ");
+		print("==== Kafka Client Properties ==== ");
 		Enumeration<Object> keys = getProperties().keys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
 			String value = "non printable value";
 			try {
 				value = (String) getProperties().get(key).toString();
+				value = obfuscatePrintPropertiesValue(key,value);
 			} catch (Exception e) {
 			}
 			print(String.format("%s: %s", key, value));
@@ -695,6 +707,18 @@ public class KafkaClientFactory {
 	public void print(String m) {
 		// PrintWriter p = this.printwriter;
 		this.printwriter.println(m);
+	}
+	
+	/**
+	 * Print a key value string to the PrintWriter
+	 * 
+	 * @param k key String
+	 * @param v value String
+	 */
+	public void printkv(String k,String v) {
+		// PrintWriter p = this.printwriter;
+		if (KafkaUtil.isNotBlank(v))
+		  this.printwriter.printf("%s: %s%n",k,v);
 	}
 
 	/**
@@ -725,6 +749,37 @@ public class KafkaClientFactory {
 		} catch (JsonProcessingException e) {
 			print(String.format("Parameter Print Error: %s%n", e.toString()));
 		}
+
+		return this;
+	}
+	
+	/**
+	 * Print (obfuscated) values
+	 */
+	public KafkaClientFactory printInfo(){
+		print("==== Info ====");
+		printkv("bootstrapServers",this.getBootstrapServers());
+		if (this.getBootstrapServersCredentials() != null) {
+		  printkv("bootstrapServersCredentials [userName only]",this.getBootstrapServersCredentials().getUserName());
+		}
+		printkv("groupId",this.getGroupId());
+		printkv("schemaRegistryURL",this.getSchemaRegistryURL());
+		if (this.getSchemaRegistryCredentials() != null) {
+			printkv("schemaRegistryCredentials [userName only]",this.getSchemaRegistryCredentials().getUserName());
+		}
+		printkv("topic",this.getTopic());
+		printkv("className",this.getClassName());
+		printkv("partition",this.getPartition());
+		printkv("offset",this.getOffset());
+		printkv("value",this.getValue());
+		printkv("key",this.getKey());
+		printkv("typeDeSer",this.getTypeDeSer().toString());
+		printkv("jdbcUrl",this.getJdbcUrl());
+		if (this.getJdbcCredentials() != null) {
+		  printkv("jdbcCredentials [userName only]",this.getJdbcCredentials().getUserName());
+		}
+		printkv("jdbcQuery",this.getJdbcQuery());
+		printProperties();
 
 		return this;
 	}
