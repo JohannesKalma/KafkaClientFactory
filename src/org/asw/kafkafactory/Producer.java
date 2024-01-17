@@ -79,7 +79,6 @@ public class Producer {
 		this.kafkaClientFactory = cf;
 		//if (cf.publishValue() instanceof String) {
 		if(typeDeSer.STRINGSER.equals(cf.getTypeDeSer())) {
-			System.out.print("Instance of String");
 			KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(cf.getProperties());
 			this.kafkaProducerString = kafkaProducer;
 		}
