@@ -5,10 +5,13 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
 /**
@@ -81,7 +84,7 @@ public class ConsumerGeneric<V> {
 		cf.print("Timer " + this.timer);
 		cf.print(LocalDateTime.now().toString());
 		while (keepIterating()) {
-			ConsumerRecords<String, V> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+			ConsumerRecords<String, V> records = this.kafkaConsumer.poll(Duration.ofMillis(1000));
 			for (ConsumerRecord<String, V> record : records) {
 				this.processData(record.value().toString());
 				if (this.doCommit) {
@@ -175,6 +178,18 @@ public class ConsumerGeneric<V> {
 		kafkaConsumer.seek(topicPartition, Long.valueOf(cf.getOffset()));
 
 		return start();
+	}
+	
+	/**
+	 * Print a list of topics to the PrintWriter<br>
+	 * Just instantiate a Consumer and the call this method:<br>
+	 * new Consumer(kafkaClientFactory).printTopics();
+	 */
+	public void printTopics() {
+	    Map<String, List<PartitionInfo>> m = this.kafkaConsumer.listTopics();
+	    for (Map.Entry<String, List<PartitionInfo>> entry : m.entrySet()) {
+	      cf.print(entry.getKey());
+	    }
 	}
 
 	/**
