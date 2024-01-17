@@ -2,17 +2,21 @@ package org.asw.kafkafactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-
+/**
+ * DTO used in Producer to generate statistics for a publisher based on a ref cursor<br> 
+ * That might produce milions of messages in short time
+ *
+ */
 public class ProducerStatistics {
 
 	int i=0;
 	KafkaClientFactory cf;
 	LocalDateTime startTime; 
 	
-	/**
-	 * constructor
-	 */
+/**
+ * constructor
+ * @param cf KafkaClientFactory
+ */
 	public ProducerStatistics(KafkaClientFactory cf) {
 		this.i=0;
 		this.cf=cf;
@@ -30,7 +34,9 @@ public class ProducerStatistics {
   private int getI() {
   	return this.i;
   }
-  
+  /**
+   * Used for the publishFromRefCursor() method in the Producer
+   */
   public void printStats() {
   	LocalDateTime now = LocalDateTime.now();
   	Duration duration = Duration.between(this.startTime,now);

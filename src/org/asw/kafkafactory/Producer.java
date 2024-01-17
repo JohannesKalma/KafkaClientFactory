@@ -217,8 +217,12 @@ public class Producer {
 		}  
 		return this;
 	}
-
-	public Producer printStatistics(PrintWriter p) {
+  /**
+   * not used yet
+   * @param p
+   * @return
+   */
+	private Producer printStatistics(PrintWriter p) {
 		return this;
 	}
 	
