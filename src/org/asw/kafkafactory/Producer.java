@@ -6,6 +6,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.time.LocalDateTime;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.Callback;
@@ -44,19 +45,8 @@ public class Producer {
 	KafkaProducer<String, SpecificRecord> kafkaProducerAVRO;
 	KafkaProducer<String, String> kafkaProducerString;
 
-	/// **
-	// * Return publisher's RecordMetadata object (containing topic, partition,
-	/// offset, ea)
-	// *
-	// * @return recordMetadata RecordMetadata
-	// */
-	// public RecordMetadata getRecordMetadata() {
-	// return recordMetadata;
-	// }
+	ProducerStatistics stats;
 
-	// private void setRecordMetadata(RecordMetadata recordMetadata) {
-	// this.recordMetadata = recordMetadata;
-	// }
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
 	 * 
@@ -77,7 +67,7 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory cf) throws Exception {
 		this.kafkaClientFactory = cf;
-		//if (cf.publishValue() instanceof String) {
+		
 		if(typeDeSer.STRINGSER.equals(cf.getTypeDeSer())) {
 			KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(cf.getProperties());
 			this.kafkaProducerString = kafkaProducer;
@@ -153,7 +143,7 @@ public class Producer {
 
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
-			System.out.println(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
+			kafkaClientFactory.print(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
 			if (e != null) {
 				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %%s%n",
 						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
@@ -163,16 +153,16 @@ public class Producer {
 
 	private Producer publishFromRefCursor() throws Exception {
 		connection = kafkaClientFactory.jdbcConnection();
-
+    
 		CallableStatement stmt = this.connection.prepareCall("{ ? = call " + kafkaClientFactory.getJdbcQuery() + " }");
 		stmt.registerOutParameter(1, Types.REF_CURSOR);
 		stmt.execute();
+    this.stats = new ProducerStatistics(kafkaClientFactory);
 
-		try (ResultSet rset = (ResultSet) stmt.getObject(1)) {
+    try (ResultSet rset = (ResultSet) stmt.getObject(1)) {
 			rset.setFetchSize(1000);
 			while (rset.next()) {
-				// stat.incrI();
-
+        this.stats.incrI();
 				BigDecimal bdid = rset.getBigDecimal(1);
 				String id = bdid.toString();
 
@@ -182,10 +172,9 @@ public class Producer {
 				
 				this.publishWithCallback(id);
 			}
-
-			// stat.printStats();
-
 		}
+		this.stats.printStats();
+
 		connection.close();
 		closeKafkaProducers();
 		return this;
@@ -219,12 +208,18 @@ public class Producer {
 	 */
 	public Producer printMetadata(PrintWriter p) {
 		this.p = p;
-		print("==== Producer MetaData ====");
-		print(String.format("topic: %s", this.recordMetadata.topic()));
-		print(String.format("partition: %s", this.recordMetadata.partition()));
-		print(String.format("offset: %s", this.recordMetadata.offset()));
-		print(String.format("timestamp: %s", this.recordMetadata.timestamp()));
+		if (this.recordMetadata != null) {
+			print("==== Producer MetaData ====");
+			print(String.format("topic: %s", this.recordMetadata.topic()));
+		  print(String.format("partition: %s", this.recordMetadata.partition()));
+		  print(String.format("offset: %s", this.recordMetadata.offset()));
+		  print(String.format("timestamp: %s", this.recordMetadata.timestamp()));
+		}  
 		return this;
 	}
 
+	public Producer printStatistics(PrintWriter p) {
+		return this;
+	}
+	
 }
