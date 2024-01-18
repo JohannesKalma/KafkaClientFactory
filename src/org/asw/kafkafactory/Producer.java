@@ -6,14 +6,12 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Types;
-import java.time.LocalDateTime;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.asw.kafkafactory.KafkaClientFactory.typeDeSer;
 
 /**
  * publish a message on a instance of a KafkaProducer<br>
@@ -68,16 +66,13 @@ public class Producer {
 	public Producer(KafkaClientFactory cf) throws Exception {
 		this.kafkaClientFactory = cf;
 		
-		if(typeDeSer.STRINGSER.equals(cf.getTypeDeSer())) {
-			KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(cf.getProperties());
-			this.kafkaProducerString = kafkaProducer;
-		}
-
-		//if (cf.publishValue() instanceof SpecificRecord) {
-		if(typeDeSer.AVROSER.equals(cf.getTypeDeSer())) {	
-			KafkaProducer<String, SpecificRecord> kafkaProducer = new KafkaProducer<String, SpecificRecord>(
-					cf.getProperties());
-			this.kafkaProducerAVRO = kafkaProducer;
+		switch (cf.getTypeDeSer()) {
+		case STRINGSER:
+			this.kafkaProducerString = new KafkaProducer<String, String>(cf.getProperties());
+		case AVROSER:
+			this.kafkaProducerAVRO = new KafkaProducer<String, SpecificRecord>(cf.getProperties());
+		default:
+			this.kafkaProducerString = new KafkaProducer<String, String>(cf.getProperties());
 		}
 	}
 
@@ -222,8 +217,8 @@ public class Producer {
    * @param p
    * @return
    */
-	private Producer printStatistics(PrintWriter p) {
-		return this;
-	}
+	//private Producer printStatistics(PrintWriter p) {
+	//	return this;
+	//}
 	
 }
