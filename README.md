@@ -46,7 +46,7 @@ String json = "{\r\n"
 
 ObjectMapper mapper = new ObjectMapper();
 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);		
-new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(jcsOut).printProperties().printParameters()).publish().printMetadata();
+new Producer((KafkaClientFactory)mapper.readValue(json, KafkaClientFactory.class).setPrintwriter(pw).printProperties().printParameters()).publish().printMetadata();
 ```
 
 The result is a set of Kafka properties:
