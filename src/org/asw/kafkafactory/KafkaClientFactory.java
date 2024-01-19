@@ -106,7 +106,7 @@ public class KafkaClientFactory {
 	 * 
 	 * @param printwriter where to write the output (jcsOut for RMJ, System.out for
 	 *                    java)
-	 * @return KafkaClientFactory instance
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory setPrintwriter(PrintWriter printwriter) {
 		this.printwriter = printwriter;
@@ -148,7 +148,7 @@ public class KafkaClientFactory {
 	/**
 	 * set typeDeSer<br>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param typeDeSer enum typeDeSer
 	 */
 	public KafkaClientFactory setTypeDeSer(typeDeSer typeDeSer) {
@@ -188,7 +188,7 @@ public class KafkaClientFactory {
 	/**
 	 * set object schemaRegistryCredentials
 	 * 
-	 * @return intance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param schemaRegistryCredentials Credentials
 	 */
 	public KafkaClientFactory setSchemaRegistryCredentials(Credentials schemaRegistryCredentials) {
@@ -208,7 +208,7 @@ public class KafkaClientFactory {
 	/**
 	 * set groupId<br>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param groupId String
 	 */
 	public KafkaClientFactory setGroupId(String groupId) {
@@ -228,7 +228,7 @@ public class KafkaClientFactory {
 	/**
 	 * set bootstrapServers (a list of brokers)<br>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param bootstrapServers STring
 	 */
 	public KafkaClientFactory setBootstrapServers(String bootstrapServers) {
@@ -248,7 +248,7 @@ public class KafkaClientFactory {
 	/**
 	 * set instance of bootstrapServersCredentials<br>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param bootstrapServersCredentials Credentials
 	 */
 	public KafkaClientFactory setBootstrapServersCredentials(Credentials bootstrapServersCredentials) {
@@ -272,7 +272,7 @@ public class KafkaClientFactory {
 	 * <br>
 	 * This is also known as the PEM Certificate Document
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param bootstrapServerTruststoreCertificate String
 	 */
 	public KafkaClientFactory setBootstrapServerTruststoreCertificate(String bootstrapServerTruststoreCertificate) {
@@ -292,7 +292,7 @@ public class KafkaClientFactory {
 	/**
 	 * set Kafka topic<br>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param topic String
 	 */
 	public KafkaClientFactory setTopic(String topic) {
@@ -314,7 +314,7 @@ public class KafkaClientFactory {
 	 * set className<br>
 	 * The DTO needed for AVRO (de)serializing
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param className String
 	 */
 	public KafkaClientFactory setClassName(String className) {
@@ -336,7 +336,7 @@ public class KafkaClientFactory {
 	 * set partition<br>
 	 * partition needed to seek a message
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param partition String
 	 */
 	public KafkaClientFactory setPartition(String partition) {
@@ -357,7 +357,7 @@ public class KafkaClientFactory {
 	/**
 	 * set offset offset needed to seek a message
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param offset String
 	 */
 	public KafkaClientFactory setOffset(String offset) {
@@ -379,7 +379,7 @@ public class KafkaClientFactory {
 	 * set value<br>
 	 * value parsed as Kafka message
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param value String
 	 */
 	public KafkaClientFactory setValue(String value) {
@@ -403,7 +403,7 @@ public class KafkaClientFactory {
 	 * According to Kafka documentation, optional, but in this lib
 	 * mandatory
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param key String
 	 */
 	public KafkaClientFactory setKey(String key) {
@@ -427,7 +427,7 @@ public class KafkaClientFactory {
 	 * must have the format jdbc:oracle:thin:@[host]:[port]:[sid]<br>
 	 * For example: jdbc:oracle:thin:@//myhost.us.example.com:1521/devdb
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param jdbcUrl String
 	 */
 	public KafkaClientFactory setJdbcUrl(String jdbcUrl) {
@@ -449,7 +449,7 @@ public class KafkaClientFactory {
 	 * set object of jdbcCredentials<br>
 	 * For dataprocessing
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param jdbcCredentials Credentials
 	 */
 	public KafkaClientFactory setJdbcCredentials(Credentials jdbcCredentials) {
@@ -495,7 +495,7 @@ public class KafkaClientFactory {
 	 * <strong>message</strong> is the message that will be published on a topic. 
 	 * </p>
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @param jdbcQuery String
 	 */
 	public KafkaClientFactory setJdbcQuery(String jdbcQuery) {
@@ -508,7 +508,7 @@ public class KafkaClientFactory {
 	 * set a JDBC connection for factory url and credentials<br>
 	 * result is a Connection value
 	 * 
-	 * @return instance of KafkaClientFactory
+	 * @return This KafkaClientFactory (to allow chaining)
 	 * @throws ClassNotFoundException --
 	 * @throws SQLException           --
 	 */
@@ -662,7 +662,7 @@ public class KafkaClientFactory {
 	 * Print generated properties for an instantiated KafkaClientFactory:<br>
 	 * initialize printwriter (setPrintWriter) is assumed
 	 * 
-	 * @return KafkaClientFactory object
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printProperties() {
 		return printProperties(this.getPrintwriter());
@@ -682,7 +682,7 @@ public class KafkaClientFactory {
 	 * Print generated properties for an instantiated KafkaClientFactory:<br>
 	 * 
 	 * @param p PrintWriter
-	 * @return KafkaClientFactory object
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printProperties(PrintWriter p) {
 		print("==== Kafka Client Properties ==== ");
@@ -727,7 +727,7 @@ public class KafkaClientFactory {
 	 * Method prints all get methods<br>
 	 * Assumed that printWriter is initialized
 	 * 
-	 * @return KafkaClientFactory object
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printParameters() {
 		return printParameters(getPrintwriter());
@@ -738,7 +738,7 @@ public class KafkaClientFactory {
 	 * Method prints all get methods
 	 * 
 	 * @param p PrintWriter
-	 * @return KafkaClientFactory object
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printParameters(PrintWriter p) {
 		print("==== Mapped Parameters ====");
@@ -755,7 +755,8 @@ public class KafkaClientFactory {
 	}
 	
 	/**
-	 * Print (obfuscated) values
+	 * Print (obfuscated) values to printwriter
+	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printInfo(){
 		print("==== Info ====");
