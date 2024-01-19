@@ -79,7 +79,7 @@ public class Producer {
 	/**
 	 * publish a message on instance of class
 	 * 
-	 * @return Producer instance
+	 * @return This Producer (to allow chaining)
 	 * @throws Exception generic exception
 	 */
 	public Producer publish() throws Exception {
@@ -187,7 +187,7 @@ public class Producer {
 	 * metaData is empty for ref cursors. Use printErrors instead.<br>
 	 * Assumed printWriter has been enabled in KafkaClientFactory
 	 * 
-	 * @return KafkaPublisher instance
+	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata() {
 		return printMetadata(kafkaClientFactory.getPrintwriter());
@@ -199,7 +199,7 @@ public class Producer {
 	 * metaData is empty for ref cursors. Use printErrors instead.
 	 * 
 	 * @param p PrintWriter
-	 * @return KafkaPublisher instance
+	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata(PrintWriter p) {
 		this.p = p;
