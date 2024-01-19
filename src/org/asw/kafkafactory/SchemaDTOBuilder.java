@@ -48,7 +48,7 @@ public class SchemaDTOBuilder {
   /**
    * Topic from schedulingserver the DTO should be based on
    * @param topic - topic name
-   * @return instance of SchemaDTOBuilder 
+   * @return This SchemaDTOBuilder (for chaining) 
    */
 	public SchemaDTOBuilder setTopic(String topic) {
 		this.topic = topic;
@@ -70,7 +70,7 @@ public class SchemaDTOBuilder {
    * and a topic<br>
 	 * 
 	 * @param kafkaClientFactory - instance of KafkaClientFactory 
-	 * @return instance of SchemaDTOBuilder 
+   * @return This SchemaDTOBuilder (for chaining) 
 	 */
 	public SchemaDTOBuilder schemaRegistryClient(KafkaClientFactory kafkaClientFactory) {
 		this.cf = kafkaClientFactory;
@@ -86,7 +86,7 @@ public class SchemaDTOBuilder {
 	
 	/**
 	 * get the schema from latest topic schema metadata
-	 * @return instance of SchemaDTOBuilder 
+   * @return This SchemaDTOBuilder (for chaining) 
 	 * @throws Exception generic Exception
 	 */
 	public SchemaDTOBuilder setSchemaFromTopic() throws Exception {
@@ -105,7 +105,7 @@ public class SchemaDTOBuilder {
 	/**
 	 * set manually a schema for instance of SchemaDTOBuilder
 	 * @param schema String
-	 * @return instance of SchemaDTOBuilder
+   * @return This SchemaDTOBuilder (for chaining) 
 	 */
 	public SchemaDTOBuilder setSchema(String schema) {
 		this.schema = schema;
@@ -115,7 +115,7 @@ public class SchemaDTOBuilder {
   /**
    * get the schema from the registy server for a topic and write java sources of a DTO in the system temp folder
    * 
-   * @return instance of SchemaDTOBuilder 
+   * @return This SchemaDTOBuilder (for chaining)  
    * @throws Exception generic exception
    */
 	public SchemaDTOBuilder buildDTOsrc() throws Exception {
@@ -142,7 +142,7 @@ public class SchemaDTOBuilder {
 	/**
 	 * compile the java sources into binary classes
 	 * 
-	 * @return instance of SchemaDTOBuilder 
+   * @return This SchemaDTOBuilder (for chaining)  
 	 * @throws Exception - generic exception
 	 */
 	public SchemaDTOBuilder compileDTOclasses() throws Exception {
@@ -165,6 +165,7 @@ public class SchemaDTOBuilder {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		return manifest;
 	}
+	
   /**
    * Write all sources and compiled classes into a valid jar file with a standard MANIFEST
    * 
