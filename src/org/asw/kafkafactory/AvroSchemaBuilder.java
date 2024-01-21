@@ -22,17 +22,27 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Build an AVRO schema (stub) based on a JSON data string.<br>
  * Stricktly not part of the Factory<br>
  * use:
- * <pre>String convertedSchema = new AvroSchemaBuilder().setNameSpace([namespace String])
+ * 
+ * <pre>
+ * String convertedSchema = new AvroSchemaBuilder().setNameSpace([namespace String])
  *					.setClassName([name of DTO class])
  *					.setDescription([description of this purpose of this schema])
  *					.convert("a data string in json format to be read");
  *				                                            
- * System.out.println(convertedSchema);</pre><br>
- *    <br>
- *    <em>Result is not a final schema, a stub is generated that needs further (minimal) manual modifications (set decend DTO names, document fields and)</em><br>
- *    Also when values should be based on a enum, then this enum must be added manually:<br>
- *    From a json the type will be string, 
- *<pre>"type": ["null",string]<pre>
+ * System.out.println(convertedSchema);
+ * </pre>
+ * 
+ * <br>
+ * <br>
+ * <em>Result is not a final schema, a stub is generated that needs further
+ * (minimal) manual modifications (set decend DTO names, document fields
+ * and)</em><br>
+ * Also when values should be based on a enum, then this enum must be added
+ * manually:<br>
+ * From a json the type will be string,
+ * 
+ * <pre>
+ * "type": ["null",string]<pre>
  *    this should be replaced by a structure like this: 
  *<pre>
  *"type": [
@@ -46,7 +56,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *         ],
  *       "type": "enum"
  *    }
- *  ]</pre>
+ *  ]
+ * </pre>
  */
 public class AvroSchemaBuilder {
 
@@ -70,13 +81,14 @@ public class AvroSchemaBuilder {
 
 	private String className;
 	private String description;
-	
+
 	private final ObjectMapper mapper;
 
 	private String nameSpace;
-	
+
 	/**
 	 * set the Namespace
+	 * 
 	 * @param nameSpace String
 	 * @return this AvroSchemaBuilder for chaining
 	 */
@@ -84,8 +96,10 @@ public class AvroSchemaBuilder {
 		this.nameSpace = nameSpace;
 		return this;
 	}
+
 	/**
 	 * set the className of this schema
+	 * 
 	 * @param className String
 	 * @return this AvroSchemaBuilder for chaining
 	 */
@@ -93,8 +107,10 @@ public class AvroSchemaBuilder {
 		this.className = className;
 		return this;
 	}
+
 	/**
 	 * set description (doc) of this schema
+	 * 
 	 * @param description String
 	 * @return this AvroSchemaBuilder for chaining
 	 */
@@ -139,8 +155,8 @@ public class AvroSchemaBuilder {
 		final JsonNode jsonNode = mapper.readTree(json);
 		final ObjectNode finalSchema = mapper.createObjectNode();
 		finalSchema.put(NAMESPACE, this.nameSpace);// "net.aswatson.event.avro.stockCount.plan");
-		finalSchema.put(NAME, this.className); //"StockCountPlan");
-		finalSchema.put(DOC, this.description);//"Headquarters initiated the creation of an inventory plan.");
+		finalSchema.put(NAME, this.className); // "StockCountPlan");
+		finalSchema.put(DOC, this.description);// "Headquarters initiated the creation of an inventory plan.");
 		finalSchema.put(TYPE, RECORD);
 		finalSchema.set(FIELDS, getFields(jsonNode));
 		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(finalSchema);
@@ -172,26 +188,27 @@ public class AvroSchemaBuilder {
 		while (elements.hasNext()) {
 			map = elements.next();
 			final JsonNode thisNode = map.getValue();
-      /* for object and array*/
+			/* for object and array */
 			final ObjectNode objectNode = mapper.createObjectNode();
-  
+
 			switch (thisNode.getNodeType()) {
 
 			case NUMBER:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** "+map.getKey()).putNull(DEFAULT).set(TYPE,
-						typeNode(thisNode.isLong() ? LONG : DOUBLE)));
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).putNull(DEFAULT)
+						.set(TYPE, typeNode(thisNode.isLong() ? LONG : DOUBLE)));
 				break;
 
 			case STRING:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** "+map.getKey()).putNull(DEFAULT).set(TYPE,
-						typeNode(STRING)));
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).putNull(DEFAULT)
+						.set(TYPE, typeNode(STRING)));
 				break;
-				
+
 			case OBJECT:
-				objectNode.put(NAME, map.getKey()).set(TYPE, typeNode(mapper.createObjectNode().put(TYPE, RECORD).put(NAME, "**** "+map.getKey()+"DTO")
-						.put(NAMESPACE, this.nameSpace).putNull(DEFAULT).set(FIELDS, getFields(thisNode))));
+				objectNode.put(NAME, map.getKey()).set(TYPE,
+						typeNode(mapper.createObjectNode().put(TYPE, RECORD).put(NAME, "**** " + map.getKey() + "DTO")
+								.put(NAMESPACE, this.nameSpace).putNull(DEFAULT).set(FIELDS, getFields(thisNode))));
 				fields.add(objectNode);
-				break;	
+				break;
 
 			case ARRAY:
 				final ArrayNode arrayNode = (ArrayNode) thisNode;
@@ -211,8 +228,10 @@ public class AvroSchemaBuilder {
 					objectNode.set(TYPE, mapper.createObjectNode().put(TYPE, ARRAY).put(ITEMS, STRING));
 					break;
 				default:
-					objectNode.set(TYPE, typeNode(mapper.createObjectNode().set(ITEMS, mapper.createObjectNode()
-							.put(TYPE, RECORD).put(NAME, "**** "+map.getKey()+"DTO").put(NAMESPACE, this.nameSpace).set(FIELDS, getFields(element)))));
+					objectNode.set(TYPE,
+							typeNode(mapper.createObjectNode().set(ITEMS,
+									mapper.createObjectNode().put(TYPE, RECORD).put(NAME, "**** " + map.getKey() + "DTO")
+											.put(NAMESPACE, this.nameSpace).set(FIELDS, getFields(element)))));
 				}
 				fields.add(objectNode);
 				break;
@@ -223,7 +242,8 @@ public class AvroSchemaBuilder {
 				break;
 
 			case BOOLEAN:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC,"*** "+ map.getKey()).set(TYPE, typeNode(BOOLEAN)));
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).set(TYPE,
+						typeNode(BOOLEAN)));
 				break;
 
 			default:
