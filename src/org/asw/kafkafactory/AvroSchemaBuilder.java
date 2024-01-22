@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *				                                            
  * System.out.println(convertedSchema);
  * </pre>
+ * 
  * <br>
  * <em>Result is not a final schema, a stub is generated that needs further
  * (minimal) manual modifications (set decend DTO names, document fields
@@ -29,10 +30,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Also when values should be based on a enum, then this enum must be added
  * manually:<br>
  * From a json conversion, the type will be converted as string,
+ * 
  * <pre>
  * "type": ["null",string]
  * </pre>
- * This should be replaced by a structure like this: 
+ * 
+ * This should be replaced by a structure like this:
+ * 
  * <pre>
  * "type": [
  *   "null",
@@ -143,25 +147,20 @@ public class AvroSchemaBuilder {
 	public String convert(final String json) throws IOException {
 		final JsonNode jsonNode = mapper.readTree(json);
 		final ObjectNode finalSchema = mapper.createObjectNode();
-		finalSchema.put(NAMESPACE, this.nameSpace);// "net.aswatson.event.avro.stockCount.plan");
-		finalSchema.put(NAME, this.className); // "StockCountPlan");
-		finalSchema.put(DOC, this.description);// "Headquarters initiated the creation of an inventory plan.");
-		finalSchema.put(TYPE, RECORD);
-		finalSchema.set(FIELDS, getFields(jsonNode));
+		finalSchema.put(NAMESPACE, this.nameSpace).put(NAME, this.className).put(DOC, this.description).put(TYPE, RECORD)
+				.set(FIELDS, getFields(jsonNode));
 		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(finalSchema);
 	}
 
 	private JsonNode typeNode(String type) {
 		final ArrayNode typeNode = mapper.createArrayNode();
-		typeNode.add(NULL);
-		typeNode.add(type);
+		typeNode.add(NULL).add(type);
 		return typeNode;
 	}
 
 	private JsonNode typeNode(ObjectNode type) {
 		final ArrayNode typeNode = mapper.createArrayNode();
-		typeNode.add(NULL);
-		typeNode.add(type);
+		typeNode.add(NULL).add(type);
 		return typeNode;
 	}
 
