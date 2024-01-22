@@ -22,23 +22,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *				                                            
  * System.out.println(convertedSchema);
  * </pre>
- * 
- * <br>
  * <br>
  * <em>Result is not a final schema, a stub is generated that needs further
  * (minimal) manual modifications (set decend DTO names, document fields
  * and)</em><br>
  * Also when values should be based on a enum, then this enum must be added
  * manually:<br>
- * From a json the type will be string,
- * 
+ * From a json conversion, the type will be converted as string,
  * <pre>
- * "type": ["null",string]<pre>
- *    this should be replaced by a structure like this: 
- *<pre>
- *"type": [
- *  "null",
- *    {
+ * "type": ["null",string]
+ * </pre>
+ * This should be replaced by a structure like this: 
+ * <pre>
+ * "type": [
+ *   "null",
+ *     {
  *       "name": "MyShapeEnum",
  *       "symbols": [
  *         "Square",
@@ -46,8 +44,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *         "Triangle"
  *         ],
  *       "type": "enum"
- *    }
- *  ]
+ *     }
+ *   ]
  * </pre>
  */
 public class AvroSchemaBuilder {
