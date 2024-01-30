@@ -182,18 +182,18 @@ public class AvroSchemaBuilder {
 			switch (thisNode.getNodeType()) {
 
 			case NUMBER:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).putNull(DEFAULT)
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, map.getKey()).putNull(DEFAULT)
 						.set(TYPE, typeNode(thisNode.isLong() ? LONG : DOUBLE)));
 				break;
 
 			case STRING:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).putNull(DEFAULT)
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, map.getKey()).putNull(DEFAULT)
 						.set(TYPE, typeNode(STRING)));
 				break;
 
 			case OBJECT:
 				objectNode.put(NAME, map.getKey()).set(TYPE,
-						typeNode(mapper.createObjectNode().put(TYPE, RECORD).put(NAME, "**** " + map.getKey() + "DTO")
+						typeNode(mapper.createObjectNode().put(TYPE, RECORD).put(NAME, map.getKey() + "DTO")
 								.put(NAMESPACE, this.nameSpace).putNull(DEFAULT).set(FIELDS, getFields(thisNode))));
 				fields.add(objectNode);
 				break;
@@ -217,8 +217,8 @@ public class AvroSchemaBuilder {
 					break;
 				default:
 					objectNode.set(TYPE,
-							typeNode(mapper.createObjectNode().set(ITEMS,
-									mapper.createObjectNode().put(TYPE, RECORD).put(NAME, "**** " + map.getKey() + "DTO")
+							typeNode(mapper.createObjectNode().put(TYPE, ARRAY).set(ITEMS,
+									mapper.createObjectNode().put(TYPE, RECORD).put(NAME, map.getKey() + "DTO")
 											.put(NAMESPACE, this.nameSpace).set(FIELDS, getFields(element)))));
 				}
 				fields.add(objectNode);
@@ -230,7 +230,7 @@ public class AvroSchemaBuilder {
 				break;
 
 			case BOOLEAN:
-				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, "*** " + map.getKey()).set(TYPE,
+				fields.add(mapper.createObjectNode().put(NAME, map.getKey()).put(DOC, map.getKey()).set(TYPE,
 						typeNode(BOOLEAN)));
 				break;
 
