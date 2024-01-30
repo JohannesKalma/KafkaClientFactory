@@ -12,7 +12,8 @@ What can this factory be of help for
 - produce data from a oracle jdbc ref cursors,
 - transfer consumer messages onto a oracle jdbc connection.
 - seek a single message on a partition with offset
-- build DTO classes from a topic schema, compile the package into a jar 
+- create an avcs file (AVRO schema) from a json data file 
+- build DTO classes from an avsc file (AVRO schema), compile the package into a jar 
 
 For our project, the consumers and producers run from Redwood RunMyJobs, that uses it's own sandboxed Printwriter. In that case the jcsOut should be used instead of System.out as parameter for the setPrintWriter.
 
