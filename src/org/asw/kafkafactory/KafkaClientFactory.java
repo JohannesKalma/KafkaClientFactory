@@ -624,7 +624,7 @@ public class KafkaClientFactory {
 			switch (getTypeDeSer()) {
 			case AVROSER:
 				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
+				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, true);
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
 				break;
