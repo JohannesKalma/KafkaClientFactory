@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 /**
  * Tools to build a DTO jar from a topic linked schema from a schema server.<br>
@@ -52,7 +51,7 @@ public class SchemaDTOBuilder {
 	String schemaName;
 	String namespace;
   PrintWriter printwriter;
-  String schema;
+  Schema schema;
 	
   /**
    * Topic from schedulingserver the DTO should be based on
@@ -110,7 +109,8 @@ public class SchemaDTOBuilder {
 		//List<String> topicList = new ArrayList<>();
 		//topicList.add(this.topic + "-value");
     String topic = this.topic + "-value";
-    this.schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema();
+    String schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema(); 
+    this.setSchema(schema);
     
 		//for (String topic : topicList) {
 		//	this.schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema();
@@ -119,6 +119,12 @@ public class SchemaDTOBuilder {
     return this;
 	}
 	
+	
+	/**
+	 * Print the list of schemas (subjects) available on the schema server
+	 * @return this SchemaDTOBuilder
+	 * @throws Exception generic
+	 */
 	public SchemaDTOBuilder listSchemas() throws Exception {
 		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
 		for (String s : c) {
@@ -127,9 +133,15 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 	
+	/**
+	 * Print the schema as linked to the topic
+	 * usage 
+	 * @return this SchemaDTOBuilder
+	 * @throws Exception generic
+	 */
 	public SchemaDTOBuilder printSchema() throws Exception {
 		ObjectMapper m = new ObjectMapper();
-		String s = m.readTree(this.schema).toPrettyString();
+		String s = m.readTree(this.schema.toString()).toPrettyString();
 		this.print(s);
 		return this;
 	}
@@ -144,7 +156,7 @@ public class SchemaDTOBuilder {
    * @return This SchemaDTOBuilder (for chaining) 
 	 */
 	public SchemaDTOBuilder setSchema(String schema) {
-		this.schema = schema;
+		this.schema = new Schema.Parser().parse(schema);
   	return this;
 	}
 	
@@ -155,8 +167,6 @@ public class SchemaDTOBuilder {
    * @throws Exception generic exception
    */
 	public SchemaDTOBuilder buildDTOsrc() throws Exception {
-		System.out.println(this.schema);
-		Schema schema = new Schema.Parser().parse(this.schema);
 		String t = String.valueOf(System.currentTimeMillis());
 
 		this.schemaName = schema.getName();
@@ -170,7 +180,7 @@ public class SchemaDTOBuilder {
 		// write the location java files are written to.
 		this.print(String.format("buildDTOsrc() write sources to: %s%n",srcDir.toString()));
 
-		SpecificCompiler specificCompiler = new SpecificCompiler(schema);
+		SpecificCompiler specificCompiler = new SpecificCompiler(this.schema);
 		// source isn't a file, but a variable, so first parameter of compileToDestination is null. 
 		specificCompiler.compileToDestination(null, srcDir);
 
