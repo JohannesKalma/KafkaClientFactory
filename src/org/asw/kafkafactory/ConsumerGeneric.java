@@ -207,7 +207,7 @@ public class ConsumerGeneric<V> {
 	public void processData(String value) throws Exception {
 		LocalDateTime start = LocalDateTime.now();
 		cf.print("startTime Processing: "+start.toString());		
-		if (cf.jdbcConnection() != null && KafkaUtil.isNotBlank(cf.getJdbcQuery())) {
+		if (KafkaUtil.isNotBlank(cf.getJdbcQuery()) && cf.jdbcConnection() != null) {
 			try(CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")){
 				stmt.setString(1, value);
 				stmt.execute();
@@ -221,12 +221,13 @@ public class ConsumerGeneric<V> {
 				}
 			}
 		}
-		LocalDateTime end = LocalDateTime.now();
-		cf.print("endTime Processing: "+end.toString());
-		cf.print("duration Processing: "+Duration.between(start,end).toMillis());
-
+		
 		if (this.doPrintValues) {
 			cf.print(value);
 		}
+		
+		LocalDateTime end = LocalDateTime.now();
+		cf.print("endTime Processing: "+end.toString());
+		cf.print("duration Processing: "+Duration.between(start,end).toMillis());
 	}
 }

@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>KafkaFactory</groupId>
 	<artifactId>KafkaFactory</artifactId>
-	<version>1_0_5test05</version>
+	<version>1_0_6</version>
 	<name>KafkaFactory</name>
 	<description>Kafka Factory Consumer and Producer Wrapper and DTO builder</description>
 	<packaging>jar</packaging>
