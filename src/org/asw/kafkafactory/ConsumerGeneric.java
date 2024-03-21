@@ -14,6 +14,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Start a subscriber (seek) onto an instance of a Consumer<br>
  * runs for 24 hours, then needs to be respawned (RMJ can help here, but other
@@ -25,6 +27,7 @@ public class ConsumerGeneric<V> {
 	private long timer;
 	private Integer errorCount;
 	private boolean doPrintValues;
+	private boolean doPrintMetadata;
 	private KafkaConsumer<String, V> kafkaConsumer;
 
 	private Long startTime;
@@ -53,6 +56,17 @@ public class ConsumerGeneric<V> {
 		doPrintValues = true;
 		return this;
 	}
+	
+	/**
+	 * dataprocessor also prints the Values.
+	 * 
+	 * @return This ConsumerGeneric (to allow chaining)
+	 */
+	public ConsumerGeneric<V> printMetadata() {
+		doPrintMetadata = true;
+		return this;
+	}
+	
 
 	/**
 	 * 1. when seek, then no timer (value=0), subscriber should then iterate exactly
@@ -88,7 +102,8 @@ public class ConsumerGeneric<V> {
 			ConsumerRecords<String, V> records = this.kafkaConsumer.poll(Duration.ofMillis(1000));
 			for (ConsumerRecord<String, V> record : records) {
 				//cf.print("debug-for1");
-				this.processData(record.value().toString());
+				//this.processData(record.value().toString());
+				this.processData(record);
 				//cf.print("debug-for2");
 				if (this.doCommit) {
 					kafkaConsumer.commitAsync();
@@ -102,6 +117,13 @@ public class ConsumerGeneric<V> {
 		return this;
 	}
 
+	class messageMetaData{
+		String key;
+		String topic;
+		String partition;
+		String offset;
+	}
+	
 	/**
 	 * Started a timed Subscriber on a topic<br>
 	 * - in scope of subscribing on a topic, it'll run for 1 day. a respawner (like
@@ -204,30 +226,125 @@ public class ConsumerGeneric<V> {
 	 * @param value String - the message from an consumer record
 	 * @throws Exception generic exception
 	 */
-	public void processData(String value) throws Exception {
+	public void processData(ConsumerRecord<String, V> record) throws Exception {
+		
+		String value = record.value().toString();
+		String metaData = new ObjectMapper().writeValueAsString(new RecordMetadata(record));
+		
 		LocalDateTime start = LocalDateTime.now();
 		cf.print("startTime Processing: "+start.toString());		
 		if (KafkaUtil.isNotBlank(cf.getJdbcQuery()) && cf.jdbcConnection() != null) {
 			try(CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")){
-				stmt.setString(1, value);
+				switch (stmt.getParameterMetaData().getParameterCount()) {
+				case 0:
+					throw new Exception(String.format("Assign at least 1 bindvariable!"));
+				case 1:
+					stmt.setString(1, value);
+					break;
+				case 2:
+					stmt.setString(1, value);
+					stmt.setString(2, metaData);
+					break;
+				default:
+					throw new Exception(String.format("Max number bindvariables (2) exceeded!"));
+				}
+
 				stmt.execute();
 			} catch (SQLException e) {
 				this.errorCount++;
 				cf.print(e.toString());
+				cf.print(e.getMessage());
 				if (this.errorCount > 100) {
 					throw new Exception(String.format(
 							"Max number of SQLExceptions in KafkaConsumerRecordProcessor.processData(). Last Message: %s",
 							e.toString()));
 				}
+				
 			}
 		}
 		
 		if (this.doPrintValues) {
 			cf.print(value);
 		}
+
+		if (this.doPrintMetadata) {
+			cf.print(metaData);
+		}
 		
 		LocalDateTime end = LocalDateTime.now();
 		cf.print("endTime Processing: "+end.toString());
 		cf.print("duration Processing: "+Duration.between(start,end).toMillis());
 	}
+	
+	class RecordMetadata{
+		
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public Long getOffset() {
+			return offset;
+		}
+
+		public void setOffset(Long offset) {
+			this.offset = offset;
+		}
+
+		public Integer getPartition() {
+			return partition;
+		}
+
+		public void setPartition(Integer partition) {
+			this.partition = partition;
+		}
+
+		public Long getTimestamp() {
+			return timestamp;
+		}
+
+		public void setTimestamp(Long timestamp) {
+			this.timestamp = timestamp;
+		}
+
+		public String getTopic() {
+			return topic;
+		}
+
+		public void setTopic(String topic) {
+			this.topic = topic;
+		}
+
+		String key;
+		Long offset;
+		Integer partition;
+		Long timestamp;
+		String topic;
+		V value;
+
+		public V getValue() {
+			return value;
+		}
+
+		public void setValue(V value) {
+			this.value = value;
+		}
+
+		/**
+		 * @param s
+		 */
+		public RecordMetadata(ConsumerRecord<String, V> record) {
+			this.key = record.key();
+			this.offset = record.offset();
+			this.partition = record.partition();
+			this.timestamp = record.timestamp();
+      this.topic = record.topic();
+      this.value = record.value();
+		}
+		
+	}
+	
 }

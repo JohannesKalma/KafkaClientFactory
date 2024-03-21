@@ -631,6 +631,7 @@ public class KafkaClientFactory {
 			case AVRODES:
 				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
 				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
+				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			case STRINGSER:
 				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
@@ -640,6 +641,7 @@ public class KafkaClientFactory {
 			case STRINGDES:
 				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			default:
 				//
