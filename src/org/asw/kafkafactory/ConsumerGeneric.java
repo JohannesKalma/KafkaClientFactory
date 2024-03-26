@@ -232,18 +232,28 @@ public class ConsumerGeneric<V> {
 		String metaData = new ObjectMapper().writeValueAsString(new RecordMetadata(record));
 		
 		LocalDateTime start = LocalDateTime.now();
-		cf.print("startTime Processing: "+start.toString());		
+		//cf.print("startTime Processing: "+start.toString());		
 		if (KafkaUtil.isNotBlank(cf.getJdbcQuery()) && cf.jdbcConnection() != null) {
-			try(CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")){
+			try (CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")) {
 				switch (stmt.getParameterMetaData().getParameterCount()) {
 				case 0:
 					throw new Exception(String.format("Assign at least 1 bindvariable!"));
 				case 1:
-					stmt.setString(1, value);
+					try {
+						stmt.setString(1, value);
+					} catch (Exception e) {
+						cf.print("setString(1) failed: " + e.toString());
+						throw new Exception(e);
+					}
 					break;
 				case 2:
-					stmt.setString(1, value);
-					stmt.setString(2, metaData);
+					try {
+						stmt.setString(1, value);
+						stmt.setString(2, metaData);
+					} catch (Exception e) {
+						cf.print("setString(2) failed: " + e.toString());
+						throw new Exception(e);
+					}
 					break;
 				default:
 					throw new Exception(String.format("Max number bindvariables (2) exceeded!"));
@@ -253,13 +263,11 @@ public class ConsumerGeneric<V> {
 			} catch (SQLException e) {
 				this.errorCount++;
 				cf.print(e.toString());
-				cf.print(e.getMessage());
 				if (this.errorCount > 100) {
 					throw new Exception(String.format(
-							"Max number of SQLExceptions in KafkaConsumerRecordProcessor.processData(). Last Message: %s",
+							"Max number (100) of SQLExceptions in KafkaConsumerRecordProcessor.processData(). Last Error Message: %s",
 							e.toString()));
 				}
-				
 			}
 		}
 		
@@ -272,8 +280,7 @@ public class ConsumerGeneric<V> {
 		}
 		
 		LocalDateTime end = LocalDateTime.now();
-		cf.print("endTime Processing: "+end.toString());
-		cf.print("duration Processing: "+Duration.between(start,end).toMillis());
+    String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n",record.key(), end.toString(), Duration.between(start,end).toMillis());
 	}
 	
 	class RecordMetadata{
@@ -323,15 +330,6 @@ public class ConsumerGeneric<V> {
 		Integer partition;
 		Long timestamp;
 		String topic;
-		V value;
-
-		public V getValue() {
-			return value;
-		}
-
-		public void setValue(V value) {
-			this.value = value;
-		}
 
 		/**
 		 * @param s
@@ -342,7 +340,6 @@ public class ConsumerGeneric<V> {
 			this.partition = record.partition();
 			this.timestamp = record.timestamp();
       this.topic = record.topic();
-      this.value = record.value();
 		}
 		
 	}
