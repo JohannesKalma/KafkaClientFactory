@@ -11,17 +11,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import javax.lang.model.SourceVersion;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.apache.avro.Schema;
+import org.apache.avro.*;
+//import org.apache.avro.Schema;
 import org.apache.avro.compiler.specific.SpecificCompiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +40,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
  * new SchemaDTOBuilder().setSchema(schema).buildDTOsrc();<br>
  * Where schema is a string. The source builder uses the apache Schema class for conversion<br> 
  * It expects a name and namespace for filecreation.
- * 
- * @author JKALMA
  *
  */
 public class SchemaDTOBuilder {
@@ -199,15 +202,49 @@ public class SchemaDTOBuilder {
 		Path root = Path.of(this.srcDir.toURI());
 		this.print(String.format("compileDTOclasses() to: %s%n",root.toString()));
 		List<Path> paths = new ArrayList<>();
+		
 		Files.walk(root).filter(Files::isRegularFile).forEach(path -> paths.add(path));
-
+		
+		this.print("=========== paths");
+		for(Path x : paths) {
+			this.print("Path:" + x.toString());
+		}
+		this.print("=========== end paths");
+	
 		JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
+	
+		Set<SourceVersion> versionSet = javaCompiler.getSourceVersions();
+		this.print("=========== versionSet");
+		for (SourceVersion sv : versionSet) {
+			this.print(sv.name());
+		}
+		this.print("=========== end versionSet");
+
 		StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
 		Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromPaths(paths);
-
-		JavaCompiler.CompilationTask task = javaCompiler.getTask(null, fileManager, null, null, null, compilationUnits);
+		
+		this.print("=========== objects");
+		for (JavaFileObject o  : compilationUnits ) {
+		  this.print(o.getName());
+		}
+		this.print("=========== end objects");
+		
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+		
+		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.printwriter, fileManager, diagnostics, null, null, compilationUnits);
 		task.call();
-
+		
+		this.print("=========== diagnostics");
+		for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
+			 this.print(d.getCode());
+			 this.print(d.getMessage(null));
+			 this.print(String.valueOf(d.getSource()));
+			 this.print(String.valueOf(d.getKind()));
+			 //this.print(String.valueOf(d.getPosition()));
+			 //this.print(String.valueOf(d.getStartPosition()));
+			 //this.print(String.valueOf(d.getEndPosition()));
+		}
+		this.print("=========== end diagnostics");
 		return this;
 	}
 
@@ -233,6 +270,7 @@ public class SchemaDTOBuilder {
 			Files.walk(sourcePath).filter(Files::isRegularFile).forEach(file -> {
 				try {
 					String entryName = sourcePath.relativize(file).toString().replace(File.separator, "/");
+					this.print(entryName);
 					JarEntry jarEntry = new JarEntry(entryName);
 					jarOutputStream.putNextEntry(jarEntry);
 					Files.copy(file, jarOutputStream);
