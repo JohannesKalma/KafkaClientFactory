@@ -221,18 +221,19 @@ public class ConsumerGeneric<V> {
 	}
 
 	/**
-	 * Process the message returned from a consumer record
+	 * Process the returned ConsumerRecord<br>
+	 * <strong>this should be a private method.</strong> 
 	 * 
-	 * @param value String - the message from an consumer record
+	 * @param record - the complete ConsumerRecord
 	 * @throws Exception generic exception
 	 */
 	public void processData(ConsumerRecord<String, V> record) throws Exception {
-		
+
 		String value = record.value().toString();
 		String metaData = new ObjectMapper().writeValueAsString(new RecordMetadata(record));
-		
+
 		LocalDateTime start = LocalDateTime.now();
-		//cf.print("startTime Processing: "+start.toString());		
+		// cf.print("startTime Processing: "+start.toString());
 		if (KafkaUtil.isNotBlank(cf.getJdbcQuery()) && cf.jdbcConnection() != null) {
 			try (CallableStatement stmt = cf.jdbcConnection().prepareCall("{ call " + cf.getJdbcQuery() + " }")) {
 				switch (stmt.getParameterMetaData().getParameterCount()) {
@@ -270,7 +271,7 @@ public class ConsumerGeneric<V> {
 				}
 			}
 		}
-		
+
 		if (this.doPrintValues) {
 			cf.print(value);
 		}
@@ -278,9 +279,10 @@ public class ConsumerGeneric<V> {
 		if (this.doPrintMetadata) {
 			cf.print(metaData);
 		}
-		
+
 		LocalDateTime end = LocalDateTime.now();
-    String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n",record.key(), end.toString(), Duration.between(start,end).toMillis());
+		String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
+				Duration.between(start, end).toMillis());
 	}
 	
 	class RecordMetadata{
