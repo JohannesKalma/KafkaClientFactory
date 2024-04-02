@@ -777,7 +777,11 @@ public class KafkaClientFactory {
 		printkv("offset",this.getOffset());
 		printkv("value",this.getValue());
 		printkv("key",this.getKey());
-		printkv("typeDeSer",this.getTypeDeSer().toString());
+		String typeDeSer = "";
+    if (this.getTypeDeSer() != null) {
+		  typeDeSer=this.getTypeDeSer().toString();
+    }
+    printkv("typeDeSer",typeDeSer);
 		printkv("jdbcUrl",this.getJdbcUrl());
 		if (this.getJdbcCredentials() != null) {
 		  printkv("jdbcCredentials [userName only]",this.getJdbcCredentials().getUserName());
