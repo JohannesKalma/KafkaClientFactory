@@ -41,8 +41,15 @@ public class ProducerStatistics {
   	LocalDateTime now = LocalDateTime.now();
   	Duration duration = Duration.between(this.startTime,now);
 
-  	double avg=duration.toMillis()/i;
-    double avgpersecond=1000/avg;
+  	double avg = -1;
+  	double avgpersecond = -1;
+  	try {
+  	 avg=duration.toMillis()/i;
+  	} catch (Exception e) {}
+  	
+  	try {
+      avgpersecond=1000/avg;
+  	} catch (Exception e) {}
   	
     cf.printkv("End", now.toString());
     cf.print("==== Producer Statistics ====");
