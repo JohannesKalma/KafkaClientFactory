@@ -4,8 +4,8 @@ package org.asw.kafkafactory;
  * Static Utilities<br>
  * Copied from org/apache/commons/lang3/StringUtils.java<br>
  * https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/StringUtils.java#L5281<br>
- *
- */
+ * 
+ */ 
 public interface KafkaUtil {
 
 	/**
