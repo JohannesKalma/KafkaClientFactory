@@ -32,7 +32,9 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 /**
  * Tools to build a DTO jar from a topic linked schema from a schema server.<br>
@@ -103,6 +105,10 @@ public class SchemaDTOBuilder {
 		}
 	}
 	
+	private SchemaMetadata getSchemaMetaData(String subject) throws Exception {
+		return this.schemaRegistryClient.getLatestSchemaMetadata(subject);
+	}
+	
 	/**
 	 * get the schema from latest topic schema metadata
    * @return This SchemaDTOBuilder (for chaining) 
@@ -112,7 +118,7 @@ public class SchemaDTOBuilder {
 		//List<String> topicList = new ArrayList<>();
 		//topicList.add(this.topic + "-value");
     String topic = this.topic + "-value";
-    String schema = this.schemaRegistryClient.getLatestSchemaMetadata(topic).getSchema(); 
+    String schema = this.getSchemaMetaData(topic).getSchema();
     this.setSchema(schema);
     
 		//for (String topic : topicList) {
@@ -131,7 +137,8 @@ public class SchemaDTOBuilder {
 	public SchemaDTOBuilder listSchemas() throws Exception {
 		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
 		for (String s : c) {
-			this.print(s);
+			Integer schemaId = this.getSchemaMetaData(s).getId();
+			this.print(String.format("%s [%s]",s, schemaId));
 		}
 		return this;
 	}
