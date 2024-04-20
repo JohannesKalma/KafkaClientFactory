@@ -90,6 +90,15 @@ public class KafkaClientFactory {
 	String jdbcQuery;
 	PrintWriter printwriter;
 	Connection connection;
+	String maxErrorCount;
+
+	public String getMaxErrorCount() {
+		return maxErrorCount;
+	}
+
+	public void setMaxErrorCount(String maxErrorCount) {
+		this.maxErrorCount = maxErrorCount;
+	}
 
 	/**
 	 * get instance of PrintWriter
@@ -555,7 +564,7 @@ public class KafkaClientFactory {
 		print("==== JDBC info ====");
 		print(String.format("Driver Name: %s", dbmd.getDriverName()));
 		print(String.format("Driver Version:  %s", dbmd.getDriverVersion()));
-		print(String.format("Database Username is:  %s", dbmd.getUserName()));
+		print(String.format("Database Username:  %s", dbmd.getUserName()));
 
 	}
 
@@ -671,7 +680,8 @@ public class KafkaClientFactory {
 	}
   
 	private String obfuscatePrintPropertiesValue(String key,String value) {
-		String[] obfuscateKeys = {"ssl.truststore.certificates", "basic.auth.user.info", "ssl.truststore.certificates","sasl.jaas.config"};
+		//String[] obfuscateKeys = {"ssl.truststore.certificates", "basic.auth.user.info", "ssl.truststore.certificates","sasl.jaas.config"};
+		String[] obfuscateKeys = {};
 		String obfuscatedValue = value;
 		boolean isCredentialParameter = Arrays.stream(obfuscateKeys).anyMatch(s -> s.equals(key));
 		if (isCredentialParameter) {
