@@ -28,21 +28,35 @@ public class ConsumerGeneric<V> {
 	private Integer errorCount;
 	private boolean doPrintValues;
 	private boolean doPrintMetadata;
+	private boolean doPrintProcessingdata;
 	private KafkaConsumer<String, V> kafkaConsumer;
 
 	private Long startTime;
 	private Integer iterator = 0;
 	private boolean doCommit;
+	private Integer maxErrorCount;
 
 	/**
 	 * constructor<br>
 	 * start an instance of a KafkaConsumer
 	 * 
 	 * @param cf instance of KafkaClientFactory
+	 * @throws Exception 
 	 */
-	public ConsumerGeneric(KafkaClientFactory cf) {
+	public ConsumerGeneric(KafkaClientFactory cf) throws Exception {
 		this.cf = cf;
 		this.errorCount = 0;
+		
+		if (cf.getMaxErrorCount() == null) {
+			this.maxErrorCount = 100;
+		} else {
+			try {
+			  this.maxErrorCount = Integer.parseInt(cf.getMaxErrorCount());
+			} catch (Exception e) {
+				throw new Exception(String.format("maxErrorCount should be an integer above zero"));				
+			}
+		}
+	
 		setTimer(typeTimer.DAY_MILLIS);
 		this.kafkaConsumer = new KafkaConsumer<String, V>(this.cf.getProperties());
 	}
@@ -66,6 +80,17 @@ public class ConsumerGeneric<V> {
 		doPrintMetadata = true;
 		return this;
 	}
+	
+	/**
+	 * dataprocessor also prints the Values.
+	 * 
+	 * @return This ConsumerGeneric (to allow chaining)
+	 */
+	public ConsumerGeneric<V> printProcessingdata() {
+		doPrintProcessingdata = true;
+		return this;
+	}
+	
 	
 
 	/**
@@ -101,14 +126,10 @@ public class ConsumerGeneric<V> {
 		while (keepIterating()) {
 			ConsumerRecords<String, V> records = this.kafkaConsumer.poll(Duration.ofMillis(1000));
 			for (ConsumerRecord<String, V> record : records) {
-				//cf.print("debug-for1");
-				//this.processData(record.value().toString());
 				this.processData(record);
-				//cf.print("debug-for2");
 				if (this.doCommit) {
 					kafkaConsumer.commitAsync();
 				}
-				//cf.print("debug-for3");
 			}
 		}
 		cf.print("End Iterator: "+LocalDateTime.now().toString());
@@ -264,10 +285,10 @@ public class ConsumerGeneric<V> {
 			} catch (SQLException e) {
 				this.errorCount++;
 				cf.print(e.toString());
-				if (this.errorCount > 100) {
+				if (this.errorCount >= this.maxErrorCount) {
 					throw new Exception(String.format(
-							"Max number (100) of SQLExceptions in KafkaConsumerRecordProcessor.processData(). Last Error Message: %s",
-							e.toString()));
+							"Max number (%s) of Errors in KafkaConsumer.processData().%n Last Error Message: %s%n",
+							this.maxErrorCount,e.toString()));
 				}
 			}
 		}
@@ -280,9 +301,11 @@ public class ConsumerGeneric<V> {
 			cf.print(metaData);
 		}
 
-		LocalDateTime end = LocalDateTime.now();
-		String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
-				Duration.between(start, end).toMillis());
+    if (this.doPrintProcessingdata) {
+  		LocalDateTime end = LocalDateTime.now();
+  		cf.print(String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
+  				Duration.between(start, end).toMillis()));
+    }
 	}
 	
 	class RecordMetadata{

@@ -10,8 +10,9 @@ public class Consumer extends ConsumerGeneric<String> {
 	/**
 	 * Initiate the generic consumer 
 	 * @param cf KafkaClientFactory instance
+	 * @throws Exception 
 	 */
-	public Consumer(KafkaClientFactory cf) {
+	public Consumer(KafkaClientFactory cf) throws Exception {
 		super(cf);
 		// TODO Auto-generated constructor stub
 	}
