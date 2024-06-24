@@ -6,6 +6,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.Callback;
@@ -38,7 +39,7 @@ public class Producer {
 	private KafkaClientFactory kafkaClientFactory;
 	private Connection connection;
 
-	private PrintWriter p;
+	private PrintWriter printwriter;
 
 	KafkaProducer<String, SpecificRecord> kafkaProducerAVRO;
 	KafkaProducer<String, String> kafkaProducerString;
@@ -54,7 +55,7 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory cf, PrintWriter p) throws Exception {
 		this(cf);
-		this.p = p;
+		this.printwriter = p;
 	}
 
 	/**
@@ -65,6 +66,7 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory cf) throws Exception {
 		this.kafkaClientFactory = cf;
+		this.printwriter = cf.printwriter;
 		
 		switch (cf.getTypeDeSer()) {
 		case STRINGSER:
@@ -83,22 +85,8 @@ public class Producer {
 	 * @throws Exception generic exception
 	 */
 	public Producer publish() throws Exception {
-		if (kafkaClientFactory.publishValue() != null) {
-			if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
-				this.recordMetadata = this.kafkaProducerAVRO
-						.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-								(SpecificRecord) kafkaClientFactory.publishValue()))
-						.get();
-				kafkaProducerAVRO.close();
-			}
-			if (kafkaClientFactory.publishValue() instanceof String) {
-				this.recordMetadata = this.kafkaProducerString
-						.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-								(String) kafkaClientFactory.publishValue()))
-						.get();
-				kafkaProducerString.close();
-			}
-			this.closeKafkaProducers();
+		if (kafkaClientFactory.publishValue() instanceof SpecificRecord || kafkaClientFactory.publishValue() instanceof String) {
+			publishSingleMessage();
 		}
 
 		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery())) {
@@ -113,6 +101,26 @@ public class Producer {
 			kafkaProducerAVRO.close();
 		if (kafkaProducerString != null)
 			kafkaProducerString.close();
+	}
+	
+	private Producer publishSingleMessage() throws Exception {
+		if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
+			this.recordMetadata = this.kafkaProducerAVRO
+					.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+							(SpecificRecord) kafkaClientFactory.publishValue()))
+					.get();
+			//kafkaProducerAVRO.close();
+		}
+		if (kafkaClientFactory.publishValue() instanceof String) {
+			this.recordMetadata = this.kafkaProducerString
+					.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+							(String) kafkaClientFactory.publishValue()))
+					.get();
+			//kafkaProducerString.close();
+		}
+		this.closeKafkaProducers();
+		
+		return this;
 	}
 
 	private Producer publishWithCallback(String messageId) throws Exception {
@@ -176,8 +184,8 @@ public class Producer {
 	}
 
 	private void print(String s) {
-		if (p != null) {
-			p.println(s);
+		if (printwriter != null) {
+			printwriter.println(s);
 		}
 	}
 
@@ -202,7 +210,7 @@ public class Producer {
 	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata(PrintWriter p) {
-		this.p = p;
+		this.printwriter = p;
 		if (this.recordMetadata != null) {
 			print("==== Producer MetaData ====");
 			print(String.format("topic: %s", this.recordMetadata.topic()));
