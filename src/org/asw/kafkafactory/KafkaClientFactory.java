@@ -628,11 +628,26 @@ public class KafkaClientFactory {
 
 		if (KafkaUtil.isNotBlank(this.getGroupId()))
 			properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, this.getGroupId());
-
+		
 		if (getTypeDeSer() != null) {
 			switch (getTypeDeSer()) {
 			case AVROSER:
+			case STRINGSER:
 				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				if (KafkaUtil.isNotBlank(this.getJdbcQuery())) {
+					properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+				}
+				break;
+				
+			default:
+				//
+			}
+		}
+		
+		if (getTypeDeSer() != null) {
+			switch (getTypeDeSer()) {
+			case AVROSER:
+				//properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
 				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
@@ -643,7 +658,7 @@ public class KafkaClientFactory {
 				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			case STRINGSER:
-				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				//properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 				break;
@@ -718,7 +733,6 @@ public class KafkaClientFactory {
 	 * @param m String
 	 */
 	public void print(String m) {
-		// PrintWriter p = this.printwriter;
 		this.printwriter.println(m);
 	}
 	
@@ -729,7 +743,6 @@ public class KafkaClientFactory {
 	 * @param v value String
 	 */
 	public void printkv(String k,String v) {
-		// PrintWriter p = this.printwriter;
 		if (KafkaUtil.isNotBlank(v))
 		  this.printwriter.printf("%s: %s%n",k,v);
 	}
@@ -806,6 +819,7 @@ public class KafkaClientFactory {
 	 * constructor
 	 */
 	public KafkaClientFactory() {
+		this.printwriter = new PrintWriter(System.out,true);
 	}
 
 }
