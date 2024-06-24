@@ -54,8 +54,10 @@ public class ProducerStatistics {
     cf.printkv("End", now.toString());
     cf.print("==== Producer Statistics ====");
 
-    if (duration.toSeconds() > 60) {
-      cf.printkv("runtime (sec)",String.valueOf(duration.toSeconds()));
+    Long durationSeconds = duration.toSeconds();
+    
+    if (durationSeconds > 60) {
+      cf.printkv("runtime (sec)",String.valueOf(durationSeconds));
     } else {
     	cf.printkv("runtime (ms)",String.valueOf(duration.toMillis()));
     }
