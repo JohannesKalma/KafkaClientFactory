@@ -90,8 +90,6 @@ public class ConsumerGeneric<V> {
 		doPrintProcessingdata = true;
 		return this;
 	}
-	
-	
 
 	/**
 	 * 1. when seek, then no timer (value=0), subscriber should then iterate exactly
@@ -128,12 +126,12 @@ public class ConsumerGeneric<V> {
 			for (ConsumerRecord<String, V> record : records) {
 				this.processData(record);
 				if (this.doCommit) {
-					kafkaConsumer.commitAsync();
+					this.kafkaConsumer.commitAsync();
 				}
 			}
 		}
 		cf.print("End Iterator: "+LocalDateTime.now().toString());
-		kafkaConsumer.close();
+		this.kafkaConsumer.close();
 		cf.closeJdbcConnection();
 		return this;
 	}
@@ -238,6 +236,7 @@ public class ConsumerGeneric<V> {
 	    Map<String, List<PartitionInfo>> m = this.kafkaConsumer.listTopics();
 	    for (Map.Entry<String, List<PartitionInfo>> entry : m.entrySet()) {
 	      cf.print(entry.getKey());
+	      
 	    }
 	}
 
