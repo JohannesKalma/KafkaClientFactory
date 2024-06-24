@@ -47,6 +47,14 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 public class SchemaDTOBuilder {
 
 	KafkaClientFactory cf;
+	public KafkaClientFactory getKafkaClientFactory() {
+		return cf;
+	}
+
+	public void setKafkaClientFactory(KafkaClientFactory cf) {
+		this.cf = cf;
+	}
+
 	SchemaRegistryClient schemaRegistryClient;
 	Properties prop;
 	String topic;
