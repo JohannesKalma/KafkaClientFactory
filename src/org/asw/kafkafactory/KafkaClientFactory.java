@@ -629,7 +629,7 @@ public class KafkaClientFactory {
 		if (KafkaUtil.isNotBlank(this.getGroupId()))
 			properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, this.getGroupId());
 		
-		if (getTypeDeSer() != null) {
+		/*if (getTypeDeSer() != null) {
 			switch (getTypeDeSer()) {
 			case AVROSER:
 			case STRINGSER:
@@ -642,12 +642,12 @@ public class KafkaClientFactory {
 			default:
 				//
 			}
-		}
+		}*/
 		
 		if (getTypeDeSer() != null) {
 			switch (getTypeDeSer()) {
 			case AVROSER:
-				//properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
 				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
@@ -658,7 +658,7 @@ public class KafkaClientFactory {
 				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			case STRINGSER:
-				//properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+				properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 				break;
