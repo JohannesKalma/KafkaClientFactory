@@ -6,7 +6,6 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Types;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.Callback;
@@ -45,6 +44,8 @@ public class Producer {
 	KafkaProducer<String, String> kafkaProducerString;
 
 	ProducerStatistics stats;
+	
+	int messageCount;
 
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
@@ -56,6 +57,7 @@ public class Producer {
 	public Producer(KafkaClientFactory cf, PrintWriter p) throws Exception {
 		this(cf);
 		this.printwriter = p;
+		this.messageCount = 0;
 	}
 
 	/**
@@ -146,10 +148,10 @@ public class Producer {
 
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
-			//kafkaClientFactory.print(this.messageId+" "+m.topic()+" "+m.partition()+" "+m.offset()+" "+m.timestamp());
 			if (e != null) {
-				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %%s%n",
-						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
+				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s%n",this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
+			} else {
+				print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",this.messageId,m.topic(),m.partition(),m.offset(),m.timestamp()));
 			}
 		}
 	}
@@ -198,7 +200,7 @@ public class Producer {
 	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata() {
-		return printMetadata(kafkaClientFactory.getPrintwriter());
+		return printMetadata(this.printwriter);
 	}
 
 	/**
