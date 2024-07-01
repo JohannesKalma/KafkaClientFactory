@@ -633,10 +633,10 @@ public class KafkaClientFactory {
 			switch (getTypeDeSer()) {
 			case AVROSER:
 			case STRINGSER:
-				properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-				if (KafkaUtil.isNotBlank(this.getJdbcQuery())) {
-					properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
-				}
+				properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+				//if (KafkaUtil.isNotBlank(this.getJdbcQuery())) {
+				//	properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+				//}
 				break;
 				
 			default:
