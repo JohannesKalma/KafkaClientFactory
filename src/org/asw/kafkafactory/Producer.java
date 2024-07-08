@@ -87,13 +87,16 @@ public class Producer {
 	 * @throws Exception generic exception
 	 */
 	public Producer publish() throws Exception {
-		if (kafkaClientFactory.publishValue() instanceof SpecificRecord || kafkaClientFactory.publishValue() instanceof String) {
-			publishSingleMessage();
-		}
-
+		  
 		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery())) {
 			publishFromRefCursor();
-		}
+		} else {
+			if (kafkaClientFactory.publishValue() != null) {
+			  if (kafkaClientFactory.publishValue() instanceof SpecificRecord || kafkaClientFactory.publishValue() instanceof String) {
+				  publishSingleMessage();
+			  }
+		  }
+		}	
 
 		return this;
 	}
