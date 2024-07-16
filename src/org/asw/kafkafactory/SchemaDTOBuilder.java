@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -219,20 +221,20 @@ public class SchemaDTOBuilder {
 		
 		Files.walk(root).filter(Files::isRegularFile).forEach(path -> paths.add(path));
 		
-		this.print("=========== paths");
-		for(Path x : paths) {
-			this.print("Path:" + x.toString());
-		}
-		this.print("=========== end paths");
+		//this.print("=========== paths");
+		//for(Path x : paths) {
+	  //		this.print("Path:" + x.toString());
+		//}
+		//this.print("=========== end paths");
 	
 		JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 	
-		Set<SourceVersion> versionSet = javaCompiler.getSourceVersions();
-		this.print("=========== versionSet");
-		for (SourceVersion sv : versionSet) {
-			this.print(sv.name());
-		}
-		this.print("=========== end versionSet");
+		//Set<SourceVersion> versionSet = javaCompiler.getSourceVersions();
+		//this.print("=========== versionSet");
+		//for (SourceVersion sv : versionSet) {
+		//	this.print(sv.name());
+		//}
+		//this.print("=========== end versionSet");
 
 		StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
 		Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromPaths(paths);
@@ -248,17 +250,19 @@ public class SchemaDTOBuilder {
 		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.printwriter, fileManager, diagnostics, null, null, compilationUnits);
 		task.call();
 		
-		this.print("=========== diagnostics");
-		for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
-			 this.print(d.getCode());
-			 this.print(d.getMessage(null));
-			 this.print(String.valueOf(d.getSource()));
-			 this.print(String.valueOf(d.getKind()));
-			 //this.print(String.valueOf(d.getPosition()));
-			 //this.print(String.valueOf(d.getStartPosition()));
-			 //this.print(String.valueOf(d.getEndPosition()));
+		if (diagnostics.getDiagnostics().size()>0) {
+		  this.print("=========== diagnostics");
+		  for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
+			  this.print(d.getCode());
+			  this.print(d.getMessage(null));
+			  this.print(String.valueOf(d.getSource()));
+			  this.print(String.valueOf(d.getKind()));
+			  //this.print(String.valueOf(d.getPosition()));
+			  //this.print(String.valueOf(d.getStartPosition()));
+			  //this.print(String.valueOf(d.getEndPosition()));
+		  }
+		  this.print("=========== end diagnostics");
 		}
-		this.print("=========== end diagnostics");
 		return this;
 	}
 
@@ -276,7 +280,12 @@ public class SchemaDTOBuilder {
 	public void createJar() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
-		File jarFile = new File(this.baseDirString + File.separator + this.namespace + ".jar");
+		LocalDateTime currentDate = LocalDateTime.now();
+    String format = "yyyyMMddHHmmss";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+    String formattedDateTime = currentDate.format(formatter);
+		
+		File jarFile = new File(this.baseDirString + File.separator + this.namespace +"."+this.schemaName.toLowerCase()+"."+ formattedDateTime +".jar");
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(jarFile);
 				JarOutputStream jarOutputStream = new JarOutputStream(fileOutputStream, getManifest())) {
@@ -284,7 +293,7 @@ public class SchemaDTOBuilder {
 			Files.walk(sourcePath).filter(Files::isRegularFile).forEach(file -> {
 				try {
 					String entryName = sourcePath.relativize(file).toString().replace(File.separator, "/");
-					this.print(entryName);
+					//this.print(entryName);
 					JarEntry jarEntry = new JarEntry(entryName);
 					jarOutputStream.putNextEntry(jarEntry);
 					Files.copy(file, jarOutputStream);
