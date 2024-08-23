@@ -123,6 +123,7 @@ public class Producer {
 					.get();
 			//kafkaProducerString.close();
 		}
+		this.printMetadata();
 		this.closeKafkaProducers();
 		
 		return this;
@@ -132,21 +133,25 @@ public class Producer {
 		if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
 			this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(),
 					kafkaClientFactory.getKey(), (SpecificRecord) kafkaClientFactory.publishValue()),
-					new ProducerCallback(messageId));
+					new ProducerCallback(messageId,this.printCallbackMetaData));
 		}
 		if (kafkaClientFactory.publishValue() instanceof String) {
 			this.kafkaProducerString.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(),
-					kafkaClientFactory.getKey(), (String) kafkaClientFactory.publishValue()), new ProducerCallback(messageId));
+					kafkaClientFactory.getKey(), (String) kafkaClientFactory.publishValue()), new ProducerCallback(messageId,this.printCallbackMetaData));
 		}
 		return this;
 	}
 
+	boolean printCallbackMetaData = false;
+	
 	private class ProducerCallback implements Callback {
 
 		String messageId;
+		boolean doPrintMetadata;
 
-		public ProducerCallback(String messageId) {
+		public ProducerCallback(String messageId,boolean doPrintMetadata) {
 			this.messageId = messageId;
+			this.doPrintMetadata = doPrintMetadata;
 		}
 
 		@Override
@@ -154,7 +159,9 @@ public class Producer {
 			if (e != null) {
 				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s%n",this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
 			} else {
-				print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",this.messageId,m.topic(),m.partition(),m.offset(),m.timestamp()));
+				if (doPrintMetadata) {
+				  print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",this.messageId,m.topic(),m.partition(),m.offset(),m.timestamp()));
+				}
 			}
 		}
 	}
@@ -203,6 +210,7 @@ public class Producer {
 	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata() {
+		this.printCallbackMetaData = true;
 		return printMetadata(this.printwriter);
 	}
 
