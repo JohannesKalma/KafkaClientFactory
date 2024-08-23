@@ -10,16 +10,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import javax.lang.model.SourceVersion;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -27,9 +26,9 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.apache.avro.*;
-//import org.apache.avro.Schema;
+import org.apache.avro.Schema;
 import org.apache.avro.compiler.specific.SpecificCompiler;
+import org.apache.avro.util.RandomData;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -137,6 +136,16 @@ public class SchemaDTOBuilder {
     return this;
 	}
 	
+	public SchemaDTOBuilder listSchemas(String find) throws Exception {
+		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
+		for (String s : c) {
+			if (s.matches(find)) {
+			  Integer schemaId = this.getSchemaMetaData(s).getId();
+			  this.print(String.format("%s [%s]",s, schemaId));
+			}  
+		}
+		return this;
+	}
 	
 	/**
 	 * Print the list of schemas (subjects) available on the schema server
@@ -144,12 +153,13 @@ public class SchemaDTOBuilder {
 	 * @throws Exception generic
 	 */
 	public SchemaDTOBuilder listSchemas() throws Exception {
-		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
-		for (String s : c) {
-			Integer schemaId = this.getSchemaMetaData(s).getId();
-			this.print(String.format("%s [%s]",s, schemaId));
-		}
-		return this;
+    return this.listSchemas("*");		
+//		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
+//		for (String s : c) {
+//			Integer schemaId = this.getSchemaMetaData(s).getId();
+//			this.print(String.format("%s [%s]",s, schemaId));
+//		}
+//		return this;
 	}
 	
 	/**
@@ -308,4 +318,10 @@ public class SchemaDTOBuilder {
 		
 		this.print(String.format("created jarfile: %s%n", jarFile.getPath()));
 	}
+	
+	public void generateBullshitData(){
+    Iterator<Object> it = new RandomData(this.schema, 1).iterator();
+    System.out.println(it.next());
+	}
+	
 }
