@@ -513,6 +513,24 @@ public class KafkaClientFactory {
 		return this;
 	}
 
+	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
+		if (KafkaUtil.isNotBlank(getJdbcUrl())) {
+			//jdbcUrl : jdbc:oracle:thin:@//ams-ibm-ds10.nl.aswatson.net:1521/gitaswo
+			if (getJdbcUrl().trim().startsWith("jdbc:oracle")){
+  			setOracleJdbcConnection();
+			}
+			
+			if (getJdbcUrl().trim().startsWith("jdbc:mysql")) {
+				setMysqlJdbcConnection();
+			}
+
+		}
+		
+		print("Connection " + connection.toString());
+		printDatabaseMetaData();
+		return this;
+	}
+	
 	/**
 	 * set a JDBC connection for factory url and credentials<br>
 	 * result is a Connection value
@@ -521,16 +539,23 @@ public class KafkaClientFactory {
 	 * @throws ClassNotFoundException --
 	 * @throws SQLException           --
 	 */
-	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
-		if (KafkaUtil.isNotBlank(getJdbcUrl())) {
-			Class.forName("oracle.jdbc.OracleDriver");
-			this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
-					getJdbcCredentials().getPassword());
-			printDatabaseMetaData();
-		}
-		print("Connection " + connection.toString());
+	public KafkaClientFactory setOracleJdbcConnection() throws ClassNotFoundException, SQLException {
+		//Class.forName("oracle.jdbc.OracleDriver");
+		Class.forName("oracle.jdbc.driver.OracleDriver");
+		
+		this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
+				getJdbcCredentials().getPassword());
 		return this;
 	}
+	
+	public KafkaClientFactory setMysqlJdbcConnection() throws ClassNotFoundException, SQLException {
+    Class.forName("com.mysql.cj.jdbc.Driver");
+		this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
+				getJdbcCredentials().getPassword());
+		return this;
+	}	
+ 
+	
 
 	/**
 	 * if set, return a jdbc connection.<br>
