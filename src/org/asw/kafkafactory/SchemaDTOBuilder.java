@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +47,21 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
  */
 public class SchemaDTOBuilder {
 
+	Iterable<String> compilerOptions ;
+	
 	KafkaClientFactory cf;
+	
+	String artifactPath;
+	String artifact;
+	
+	public String getArtifactPath() {
+		return artifactPath;
+	}
+	
+	public String getArtifact() {
+		return artifact;
+	}
+
 	public KafkaClientFactory getKafkaClientFactory() {
 		return cf;
 	}
@@ -117,16 +132,49 @@ public class SchemaDTOBuilder {
 		return this.schemaRegistryClient.getLatestSchemaMetadata(subject);
 	}
 	
+	public enum schemaTypeEnum{
+		KEY,VALUE
+	}
+	
+	schemaTypeEnum schemaType = schemaTypeEnum.VALUE;
+	
+	public SchemaDTOBuilder setSchemaTypeKey(){
+		this.schemaType = schemaTypeEnum.KEY;
+		return this;
+	}
+	
+	public SchemaDTOBuilder setSchemaTypeValue(){
+		this.schemaType = schemaTypeEnum.VALUE;
+		return this;
+	}
+	
+	public SchemaDTOBuilder setSchemaType(schemaTypeEnum schemaType) {
+		this.schemaType = schemaType;
+		return this;
+	}
+	
+	private String formatTopic() {
+		
+		String formattedTopicName = String.format("%s-%s",this.topic,"value");
+		switch (this.schemaType) {
+		  case KEY:
+		  	formattedTopicName = String.format("%s-%s",this.topic,"key");
+		  	break;
+		  default:	
+		  	//
+		}
+		
+		return formattedTopicName;
+	}
+	
 	/**
 	 * get the schema from latest topic schema metadata
    * @return This SchemaDTOBuilder (for chaining) 
 	 * @throws Exception generic Exception
 	 */
 	public SchemaDTOBuilder setSchemaFromTopic() throws Exception {
-		//List<String> topicList = new ArrayList<>();
-		//topicList.add(this.topic + "-value");
-    String topic = this.topic + "-value";
-    String schema = this.getSchemaMetaData(topic).getSchema();
+		
+    String schema = this.getSchemaMetaData(formatTopic()).getSchema();
     this.setSchema(schema);
     
 		//for (String topic : topicList) {
@@ -216,7 +264,29 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 	
-	
+	public SchemaDTOBuilder buildClassPath(String path) {
+		
+		StringBuilder classPath = new StringBuilder();
+		classPath.append(System.getProperty("java.class.path"));
+		if(KafkaUtil.isNotBlank(path)) {
+		  File pathFile = new File(path);
+		  for (File file : pathFile.listFiles()) {
+			  if (file.isFile() && file.getName().endsWith(".jar")) {
+			  	classPath.append(System.getProperty("path.separator"));
+				  classPath.append(path);
+				  classPath.append(file.getName());
+        }
+		  }  
+		}
+		
+		compilerOptions = Arrays.asList( "-classpath",classPath.toString());
+		
+		for (String s : compilerOptions) {
+			print(s);
+		}
+
+		return this;
+	}
 
 	/**
 	 * compile the java sources into binary classes
@@ -257,7 +327,7 @@ public class SchemaDTOBuilder {
 		
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		
-		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.printwriter, fileManager, diagnostics, null, null, compilationUnits);
+		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.printwriter, fileManager, diagnostics, compilerOptions, null, compilationUnits);
 		task.call();
 		
 		if (diagnostics.getDiagnostics().size()>0) {
@@ -287,15 +357,15 @@ public class SchemaDTOBuilder {
    * 
    * @throws Exception - generic Exception
    */
-	public void createJar() throws Exception {
+	public SchemaDTOBuilder buildArtifact() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
 		LocalDateTime currentDate = LocalDateTime.now();
     String format = "yyyyMMddHHmmss";
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
     String formattedDateTime = currentDate.format(formatter);
-		
-		File jarFile = new File(this.baseDirString + File.separator + this.namespace +"."+this.schemaName.toLowerCase()+"."+ formattedDateTime +".jar");
+		this.artifact = this.namespace +"."+this.schemaName.toLowerCase()+"."+ formattedDateTime +".jar";
+		File jarFile = new File(this.baseDirString + File.separator + this.artifact);
 
 		try (FileOutputStream fileOutputStream = new FileOutputStream(jarFile);
 				JarOutputStream jarOutputStream = new JarOutputStream(fileOutputStream, getManifest())) {
@@ -315,8 +385,10 @@ public class SchemaDTOBuilder {
 		} catch(Exception e) {
 			this.print(String.format("Exception createJar() %s%n",e.toString()));
 		}
+		this.artifactPath = jarFile.getPath();
+		this.print(String.format("created jarfile: %s%n", this.artifactPath));
 		
-		this.print(String.format("created jarfile: %s%n", jarFile.getPath()));
+		return this;
 	}
 	
 	public void generateBullshitData(){
