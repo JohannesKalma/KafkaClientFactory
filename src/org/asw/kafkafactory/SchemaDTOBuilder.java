@@ -80,6 +80,7 @@ public class SchemaDTOBuilder {
 	String namespace;
   PrintWriter printwriter;
   Schema schema;
+  SchemaMetadata schemaMetadata;
 	
   /**
    * Topic from schedulingserver the DTO should be based on
@@ -115,7 +116,7 @@ public class SchemaDTOBuilder {
 		this.printwriter = cf.getPrintwriter();
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Map<String, String> propMap = (Map) prop;
-		schemaRegistryClient = new CachedSchemaRegistryClient((String) prop.get("schema.registry.url"), 10000, propMap);
+		this.schemaRegistryClient = new CachedSchemaRegistryClient((String) prop.get("schema.registry.url"), 10000, propMap);
 
 		return this;
 	}
@@ -126,6 +127,19 @@ public class SchemaDTOBuilder {
 		} else {
 			System.out.println(s);
 		}
+	}
+
+	public SchemaDTOBuilder printAllVersions() throws Exception {
+		List<Integer> versionList = this.schemaRegistryClient.getAllVersions(this.topic+"-value");
+		String list = "";
+		for (Integer version: versionList) {
+      list = list + version + ";";			
+		}
+		
+		print(list);
+		
+		return this;
+	
 	}
 	
 	private SchemaMetadata getSchemaMetaData(String subject) throws Exception {
@@ -174,7 +188,8 @@ public class SchemaDTOBuilder {
 	 */
 	public SchemaDTOBuilder setSchemaFromTopic() throws Exception {
 		
-    String schema = this.getSchemaMetaData(formatTopic()).getSchema();
+		this.schemaMetadata = this.getSchemaMetaData(formatTopic());
+    String schema = this.schemaMetadata.getSchema();
     this.setSchema(schema);
     
 		//for (String topic : topicList) {
@@ -183,6 +198,8 @@ public class SchemaDTOBuilder {
 		//}
     return this;
 	}
+
+	
 	
 	public SchemaDTOBuilder listSchemas(String find) throws Exception {
 		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
@@ -202,12 +219,6 @@ public class SchemaDTOBuilder {
 	 */
 	public SchemaDTOBuilder listSchemas() throws Exception {
     return this.listSchemas("*");		
-//		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
-//		for (String s : c) {
-//			Integer schemaId = this.getSchemaMetaData(s).getId();
-//			this.print(String.format("%s [%s]",s, schemaId));
-//		}
-//		return this;
 	}
 	
 	/**
@@ -264,7 +275,7 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 	
-	public SchemaDTOBuilder buildClassPath(String path) {
+	public SchemaDTOBuilder setBuilderClassPath(String path) {
 		
 		StringBuilder classPath = new StringBuilder();
 		classPath.append(System.getProperty("java.class.path"));
