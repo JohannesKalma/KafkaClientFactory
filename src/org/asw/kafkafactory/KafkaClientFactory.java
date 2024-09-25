@@ -89,7 +89,7 @@ public class KafkaClientFactory {
 	Credentials jdbcCredentials;
 	String jdbcQuery;
 	PrintWriter printwriter;
-	Connection connection;
+	Connection jdbcConnection;
 	String maxErrorCount;
 
 	public String getMaxErrorCount() {
@@ -513,23 +513,6 @@ public class KafkaClientFactory {
 		return this;
 	}
 
-	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
-		if (KafkaUtil.isNotBlank(getJdbcUrl())) {
-			//jdbcUrl : jdbc:oracle:thin:@//ams-ibm-ds10.nl.aswatson.net:1521/gitaswo
-			if (getJdbcUrl().trim().startsWith("jdbc:oracle")){
-  			setOracleJdbcConnection();
-			}
-			
-			if (getJdbcUrl().trim().startsWith("jdbc:mysql")) {
-				setMysqlJdbcConnection();
-			}
-
-		}
-		
-		print("Connection " + connection.toString());
-		printDatabaseMetaData();
-		return this;
-	}
 	
 	/**
 	 * set a JDBC connection for factory url and credentials<br>
@@ -538,24 +521,36 @@ public class KafkaClientFactory {
 	 * @return This KafkaClientFactory (to allow chaining)
 	 * @throws ClassNotFoundException --
 	 * @throws SQLException           --
-	 */
-	public KafkaClientFactory setOracleJdbcConnection() throws ClassNotFoundException, SQLException {
-		//Class.forName("oracle.jdbc.OracleDriver");
-		Class.forName("oracle.jdbc.driver.OracleDriver");
+	 */	
+	public KafkaClientFactory setJdbcConnection() throws ClassNotFoundException, SQLException {
+		if (KafkaUtil.isNotBlank(getJdbcUrl())) {
+			//jdbcUrl : jdbc:oracle:thin:@//ams-ibm-ds10.nl.aswatson.net:1521/gitaswo
+			if (getJdbcUrl().trim().startsWith("jdbc:oracle")){
+  			setOracleJdbcConnection();
+			}
+			if (getJdbcUrl().trim().startsWith("jdbc:mysql")) {
+				setMysqlJdbcConnection();
+			}
+		}
 		
-		this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
+		print("Connection " + jdbcConnection.toString());
+		printDatabaseMetaData();
+		return this;
+	}
+
+	private KafkaClientFactory setOracleJdbcConnection() throws ClassNotFoundException, SQLException {
+		Class.forName("oracle.jdbc.driver.OracleDriver");
+		this.jdbcConnection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
 				getJdbcCredentials().getPassword());
 		return this;
 	}
 	
-	public KafkaClientFactory setMysqlJdbcConnection() throws ClassNotFoundException, SQLException {
+	private KafkaClientFactory setMysqlJdbcConnection() throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.cj.jdbc.Driver");
-		this.connection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
+		this.jdbcConnection = DriverManager.getConnection(getJdbcUrl(), getJdbcCredentials().getUserName(),
 				getJdbcCredentials().getPassword());
 		return this;
 	}	
- 
-	
 
 	/**
 	 * if set, return a jdbc connection.<br>
@@ -567,10 +562,10 @@ public class KafkaClientFactory {
 	 * @throws SQLException           only needed for the setJdbcConnection
 	 */
 	public Connection jdbcConnection() throws ClassNotFoundException, SQLException {
-		if (this.connection == null) {
+		if (this.jdbcConnection == null) {
 			setJdbcConnection();
 		}
-		return this.connection;
+		return this.jdbcConnection;
 	}
 
 	/**
@@ -579,18 +574,18 @@ public class KafkaClientFactory {
 	 * @throws SQLException --
 	 */
 	public void closeJdbcConnection() throws SQLException {
-		if (this.connection != null) {
-			this.connection.close();
+		if (this.jdbcConnection != null) {
+			this.jdbcConnection.close();
+			print("jdbcConnection closed!");
 		}
 	}
 
 	private void printDatabaseMetaData() throws SQLException {
-		DatabaseMetaData dbmd = connection.getMetaData();
+		DatabaseMetaData dbmd = jdbcConnection.getMetaData();
 		print("==== JDBC info ====");
 		print(String.format("Driver Name: %s", dbmd.getDriverName()));
 		print(String.format("Driver Version:  %s", dbmd.getDriverVersion()));
 		print(String.format("Database Username:  %s", dbmd.getUserName()));
-
 	}
 
 	/**
@@ -674,22 +669,24 @@ public class KafkaClientFactory {
 			case AVROSER:
 				properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
 				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
-				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+				properties.put(KafkaAvroSerializerConfig.USE_LATEST_VERSION,true);
+				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+				//properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
+				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 				break;
 			case AVRODES:
-				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
-				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
+				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
+				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
 				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			case STRINGSER:
 				properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
-				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
+				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
 				break;
 			case STRINGDES:
-				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+				properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
+				properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringDeserializer.class);
 				properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 				break;
 			default:
@@ -845,6 +842,10 @@ public class KafkaClientFactory {
 	 */
 	public KafkaClientFactory() {
 		this.printwriter = new PrintWriter(System.out,true);
+	}
+	
+	public KafkaClientFactory(PrintWriter printwriter) {
+		this.printwriter = printwriter;
 	}
 
 }
