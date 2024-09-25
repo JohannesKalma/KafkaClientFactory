@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>KafkaFactory</groupId>
 	<artifactId>KafkaFactory</artifactId>
-	<version>1_0_10_2</version>
+	<version>1_0_11_0</version>
 	<name>KafkaFactory</name>
 	<description>Kafka Factory Consumer and Producer Wrapper and DTO builder</description>
 	<packaging>jar</packaging>
@@ -15,6 +15,7 @@
 	</repositories>
 
 	<dependencies>
+	 
 		<!--  https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind  -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -55,6 +56,7 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<version>9.0.0</version>
 		</dependency>
+		
 	</dependencies>
 	<build>
 		<sourceDirectory>src/</sourceDirectory>
