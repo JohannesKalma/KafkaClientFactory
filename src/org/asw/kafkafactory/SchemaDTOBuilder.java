@@ -131,12 +131,13 @@ public class SchemaDTOBuilder {
 
 	public SchemaDTOBuilder printAllVersions() throws Exception {
 		List<Integer> versionList = this.schemaRegistryClient.getAllVersions(this.topic+"-value");
+		
 		String list = "";
 		for (Integer version: versionList) {
       list = list + version + ";";			
 		}
 		
-		print(list);
+		print("Versions: "+list +"[for topic "+this.topic+"-value]");
 		
 		return this;
 	
@@ -144,6 +145,12 @@ public class SchemaDTOBuilder {
 	
 	private SchemaMetadata getSchemaMetaData(String subject) throws Exception {
 		return this.schemaRegistryClient.getLatestSchemaMetadata(subject);
+	}
+	
+	public SchemaDTOBuilder printSchemaId() throws Exception {
+		print("SchemaId: "+String.valueOf(this.schemaRegistryClient.getLatestSchemaMetadata(this.topic+"-value").getId()));
+		
+		return this;
 	}
 	
 	public enum schemaTypeEnum{
@@ -269,10 +276,15 @@ public class SchemaDTOBuilder {
 		this.print(String.format("buildDTOsrc() write sources to: %s%n",srcDir.toString()));
 
 		SpecificCompiler specificCompiler = new SpecificCompiler(this.schema);
+
 		// source isn't a file, but a variable, so first parameter of compileToDestination is null. 
 		specificCompiler.compileToDestination(null, srcDir);
 
 		return this;
+	}
+	
+	public SchemaDTOBuilder buildClassPath(String path) {
+		return setBuilderClassPath(path);
 	}
 	
 	public SchemaDTOBuilder setBuilderClassPath(String path) {
@@ -356,7 +368,7 @@ public class SchemaDTOBuilder {
 		}
 		return this;
 	}
-
+	
 	private static Manifest getManifest() {
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
