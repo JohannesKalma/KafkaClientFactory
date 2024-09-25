@@ -36,29 +36,28 @@ public class Producer {
 
 	private RecordMetadata recordMetadata;
 	private KafkaClientFactory kafkaClientFactory;
-	private Connection connection;
-
-	private PrintWriter printwriter;
 
 	KafkaProducer<String, SpecificRecord> kafkaProducerAVRO;
 	KafkaProducer<String, String> kafkaProducerString;
 
 	ProducerStatistics stats;
 	
+	boolean printCallbackMetaData = false;
+
 	int messageCount;
 
-	/**
-	 * Constructor instantiate a Producer (either String or AVRO)
-	 * 
-	 * @param cf KafkaClientFactory instance
-	 * @param p  PrintWriter needed for printing (jcsOut in RMJ)
-	 * @throws Exception generic exception
-	 */
-	public Producer(KafkaClientFactory cf, PrintWriter p) throws Exception {
-		this(cf);
-		this.printwriter = p;
-		this.messageCount = 0;
-	}
+//	/**
+//	 * Constructor instantiate a Producer (either String or AVRO)
+//	 * 
+//	 * @param cf KafkaClientFactory instance
+//	 * @param p  PrintWriter needed for printing (jcsOut in RMJ)
+//	 * @throws Exception generic exception
+//	 */
+//	public Producer(KafkaClientFactory cf, PrintWriter p) throws Exception {
+//		this(cf);
+//		this.printwriter = p;
+//		this.messageCount = 0;
+//	}
 
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
@@ -68,16 +67,6 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory cf) throws Exception {
 		this.kafkaClientFactory = cf;
-		this.printwriter = cf.printwriter;
-		
-		switch (cf.getTypeDeSer()) {
-		case STRINGSER:
-			this.kafkaProducerString = new KafkaProducer<String, String>(cf.getProperties());
-		case AVROSER:
-			this.kafkaProducerAVRO = new KafkaProducer<String, SpecificRecord>(cf.getProperties());
-		default:
-			this.kafkaProducerString = new KafkaProducer<String, String>(cf.getProperties());
-		}
 	}
 
 	/**
@@ -87,159 +76,176 @@ public class Producer {
 	 * @throws Exception generic exception
 	 */
 	public Producer publish() throws Exception {
-		  
-		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery())) {
-			publishFromRefCursor();
-		} else {
-			if (kafkaClientFactory.publishValue() != null) {
-			  if (kafkaClientFactory.publishValue() instanceof SpecificRecord || kafkaClientFactory.publishValue() instanceof String) {
-				  publishSingleMessage();
-			  }
-		  }
-		}	
+    
+		try {
+			switch (this.kafkaClientFactory.getTypeDeSer()) {
+			case AVROSER:
+				this.kafkaProducerAVRO = new KafkaProducer<String, SpecificRecord>(this.kafkaClientFactory.getProperties());
+				break;
+			default:
+				this.kafkaProducerString = new KafkaProducer<String, String>(this.kafkaClientFactory.getProperties());
+				break;
+			}
+
+			if (KafkaUtil.isNotBlank(this.kafkaClientFactory.getJdbcQuery())) {
+				publishFromRefCursor();
+			} else {
+				if (this.kafkaClientFactory.publishValue() != null) {
+					if (this.kafkaClientFactory.publishValue() instanceof SpecificRecord
+							|| this.kafkaClientFactory.publishValue() instanceof String) {
+						publishSingleMessage();
+					}
+				} else {
+					throw new Exception("Nothing to publish. Expecting either a jdbcQuery OR a value!");
+				}
+			}
+		} catch (Exception e) {
+			throw new Exception("org.asw.kafkafactory.Producer.publish()",e);
+		} finally {
+			this.closeKafkaProducers();
+		}
 
 		return this;
 	}
 
 	private void closeKafkaProducers() {
-		if (kafkaProducerAVRO != null)
+		if (kafkaProducerAVRO != null) {
 			kafkaProducerAVRO.close();
-		if (kafkaProducerString != null)
+		  print("Avro kafkaProducer closed!");
+		}  
+		
+		if (kafkaProducerString != null) {
 			kafkaProducerString.close();
+		  print("String kafkaProducer closed!");
+		}  
+	}
+
+	private Producer publishSingleMessage() throws Exception {
+		try {
+			if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
+				this.recordMetadata = this.kafkaProducerAVRO
+						.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+								(SpecificRecord) kafkaClientFactory.publishValue()))
+						.get();
+			}
+			if (kafkaClientFactory.publishValue() instanceof String) {
+				this.recordMetadata = this.kafkaProducerString
+						.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+								(String) kafkaClientFactory.publishValue()))
+						.get();
+			}
+
+			this.printRecordMetaData();
+			
+		} catch (Exception e) {
+			throw new Exception("org.asw.kafkafactory.Producer.publishSingleMessage()", e);
+		}
+
+		return this;
+	}
+
+	private Producer publishFromRefCursor() throws Exception {
+		
+		try {
+			CallableStatement stmt = kafkaClientFactory.jdbcConnection().prepareCall("{ ? = call " + kafkaClientFactory.getJdbcQuery() + " }");
+			stmt.registerOutParameter(1, Types.REF_CURSOR);
+			stmt.execute();
+			this.stats = new ProducerStatistics(kafkaClientFactory);
+
+			try (ResultSet rset = (ResultSet) stmt.getObject(1)) {
+				rset.setFetchSize(1000);
+				while (rset.next()) {
+					this.stats.incrI();
+					BigDecimal bdid = rset.getBigDecimal(1);
+					String id = bdid.toString();
+
+					kafkaClientFactory.setTopic(rset.getString(2));
+					kafkaClientFactory.setKey(rset.getString(3));
+					kafkaClientFactory.setValue(rset.getString(4));
+
+					this.publishWithCallback(id);
+				}
+			}
+			this.stats.printStats();
+		} catch (Exception e) {
+			throw new Exception("org.asw.kafkafactory.Producer.publishFromRefCursor()",e);
+		} finally {
+			kafkaClientFactory.closeJdbcConnection();
+		}	
+		return this;
 	}
 	
-	private Producer publishSingleMessage() throws Exception {
-		if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
-			this.recordMetadata = this.kafkaProducerAVRO
-					.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-							(SpecificRecord) kafkaClientFactory.publishValue()))
-					.get();
-			//kafkaProducerAVRO.close();
-		}
-		if (kafkaClientFactory.publishValue() instanceof String) {
-			this.recordMetadata = this.kafkaProducerString
-					.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-							(String) kafkaClientFactory.publishValue()))
-					.get();
-			//kafkaProducerString.close();
-		}
-		this.printMetadata();
-		this.closeKafkaProducers();
-		
-		return this;
-	}
-
 	private Producer publishWithCallback(String messageId) throws Exception {
-		if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
-			this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(),
-					kafkaClientFactory.getKey(), (SpecificRecord) kafkaClientFactory.publishValue()),
-					new ProducerCallback(messageId,this.printCallbackMetaData));
-		}
-		if (kafkaClientFactory.publishValue() instanceof String) {
-			this.kafkaProducerString.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(),
-					kafkaClientFactory.getKey(), (String) kafkaClientFactory.publishValue()), new ProducerCallback(messageId,this.printCallbackMetaData));
+		try {
+			if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
+				this.kafkaProducerAVRO.send(
+						new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+								(SpecificRecord) kafkaClientFactory.publishValue()),
+						//new ProducerCallback(messageId, this.printCallbackMetaData));
+				    new ProducerCallback(messageId));
+			}
+			if (kafkaClientFactory.publishValue() instanceof String) {
+				this.kafkaProducerString.send(
+						new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
+								(String) kafkaClientFactory.publishValue()),
+						//new ProducerCallback(messageId, this.printCallbackMetaData));
+						new ProducerCallback(messageId));
+			}
+		} catch (Exception e) {
+			throw new Exception("org.asw.kafkafactory.Producer.publishWithCallback",e);
 		}
 		return this;
-	}
-
-	boolean printCallbackMetaData = false;
+	}	
 	
 	private class ProducerCallback implements Callback {
 
 		String messageId;
-		boolean doPrintMetadata;
+		//boolean doPrintMetadata = false;
 
-		public ProducerCallback(String messageId,boolean doPrintMetadata) {
+		//public ProducerCallback(String messageId, boolean doPrintMetadata) {
+		public ProducerCallback(String messageId) {
 			this.messageId = messageId;
-			this.doPrintMetadata = doPrintMetadata;
+			//this.doPrintMetadata = doPrintMetadata;
 		}
 
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
 			if (e != null) {
-				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s%n",this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
-			} else {
-				if (doPrintMetadata) {
-				  print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",this.messageId,m.topic(),m.partition(),m.offset(),m.timestamp()));
-				}
-			}
+				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s%n",
+						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
+			} //else {
+				//if (doPrintMetadata) {
+					//print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",
+					//		this.messageId, m.topic(), m.partition(), m.offset(), m.timestamp()));
+				//}
+			//}
 		}
-	}
-
-	private Producer publishFromRefCursor() throws Exception {
-		connection = kafkaClientFactory.jdbcConnection();
-    
-		CallableStatement stmt = this.connection.prepareCall("{ ? = call " + kafkaClientFactory.getJdbcQuery() + " }");
-		stmt.registerOutParameter(1, Types.REF_CURSOR);
-		stmt.execute();
-    this.stats = new ProducerStatistics(kafkaClientFactory);
-
-    try (ResultSet rset = (ResultSet) stmt.getObject(1)) {
-			rset.setFetchSize(1000);
-			while (rset.next()) {
-        this.stats.incrI();
-				BigDecimal bdid = rset.getBigDecimal(1);
-				String id = bdid.toString();
-
-				kafkaClientFactory.setTopic(rset.getString(2));
-				kafkaClientFactory.setKey(rset.getString(3));
-				kafkaClientFactory.setValue(rset.getString(4));
-				
-				this.publishWithCallback(id);
-			}
-		}
-		this.stats.printStats();
-
-		connection.close();
-		closeKafkaProducers();
-		return this;
 	}
 
 	private void print(String s) {
-		if (printwriter != null) {
-			printwriter.println(s);
-		}
+		this.kafkaClientFactory.print(s);
 	}
 
 	/**
 	 * For published (single) message, print a formatted list: topic, partition,
 	 * offset, timestamp (utc epoch value)<br>
 	 * metaData is empty for ref cursors. Use printErrors instead.<br>
-	 * Assumed printWriter has been enabled in KafkaClientFactory
 	 * 
 	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata() {
 		this.printCallbackMetaData = true;
-		return printMetadata(this.printwriter);
-	}
-
-	/**
-	 * For published (single) message, print a formatted list: topic, partition,
-	 * offset, timestamp (utc epoch value)<br>
-	 * metaData is empty for ref cursors. Use printErrors instead.
-	 * 
-	 * @param p PrintWriter
-	 * @return This Producer (to allow chaining)
-	 */
-	public Producer printMetadata(PrintWriter p) {
-		this.printwriter = p;
-		if (this.recordMetadata != null) {
-			print("==== Producer MetaData ====");
-			print(String.format("topic: %s", this.recordMetadata.topic()));
-		  print(String.format("partition: %s", this.recordMetadata.partition()));
-		  print(String.format("offset: %s", this.recordMetadata.offset()));
-		  print(String.format("timestamp: %s", this.recordMetadata.timestamp()));
-		}  
 		return this;
 	}
-  /**
-   * not used yet
-   * @param p
-   * @return
-   */
-	//private Producer printStatistics(PrintWriter p) {
-	//	return this;
-	//}
 	
+	private void printRecordMetaData() {
+		if (this.recordMetadata != null && printCallbackMetaData ) {
+			print("==== Producer MetaData ====");
+			print(String.format("topic: %s", this.recordMetadata.topic()));
+			print(String.format("partition: %s", this.recordMetadata.partition()));
+			print(String.format("offset: %s", this.recordMetadata.offset()));
+			print(String.format("timestamp: %s", this.recordMetadata.timestamp()));
+		}
+	}
+
 }
