@@ -225,7 +225,7 @@ public class SchemaDTOBuilder {
 	 * @throws Exception generic
 	 */
 	public SchemaDTOBuilder listSchemas() throws Exception {
-    return this.listSchemas("*");		
+    return this.listSchemas(".*");		
 	}
 	
 	/**
@@ -380,6 +380,7 @@ public class SchemaDTOBuilder {
    * 
    * @throws Exception - generic Exception
    */
+
 	public SchemaDTOBuilder buildArtifact() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
