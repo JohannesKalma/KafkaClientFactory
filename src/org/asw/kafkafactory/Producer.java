@@ -156,14 +156,22 @@ public class Producer {
 				rset.setFetchSize(1000);
 				while (rset.next()) {
 					this.stats.incrI();
-					BigDecimal bdid = rset.getBigDecimal(1);
-					String id = bdid.toString();
-
+					//BigDecimal bdid = rset.getBigDecimal(1);
+					String id = String.valueOf(rset.getBigDecimal(1)); //   bdid.toString();
+          
 					kafkaClientFactory.setTopic(rset.getString(2));
 					kafkaClientFactory.setKey(rset.getString(3));
 					kafkaClientFactory.setValue(rset.getString(4));
-
-					this.publishWithCallback(id);
+          
+					if ((KafkaUtil.isNotBlank(kafkaClientFactory.getTopic()) && KafkaUtil.isNotBlank(kafkaClientFactory.getValue()))) { 
+   					this.publishWithCallback(id);
+					} else {
+						try {
+						  print(String.format("cursor % returned invalid topic and/or value. Got parametervalues: %s, %s, %s, %s", rset.getCursorName(),String.valueOf(rset.getBigDecimal(1)),rset.getString(2),rset.getString(3),rset.getString(4)));
+						} catch (Exception e) {
+							print("cursor did returned invalid values");
+						}
+					}
 				}
 			}
 			this.stats.printStats();
