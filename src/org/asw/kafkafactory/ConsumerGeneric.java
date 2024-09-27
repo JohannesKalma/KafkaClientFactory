@@ -125,8 +125,8 @@ public class ConsumerGeneric<V> {
 	public ConsumerGeneric<V> start() throws Exception {
 		try {
 			startTime = System.currentTimeMillis();
-			// Long startTime = System.currentTimeMillis();
-			print("=== ConsumerGeneric.start ===");
+
+			print("=== Consumer start ===");
 			print(startTime.toString());
 			print("Timer " + this.timer);
 			print("Start Iterator: " + LocalDateTime.now().toString());
@@ -167,13 +167,13 @@ public class ConsumerGeneric<V> {
 	 */
 	public ConsumerGeneric<V> subscribe() throws Exception {
 		
-		KafkaConsumer<String, V> kafkaConsumer = null;
 		this.doCommit = true;
 		try {
-			kafkaConsumer = new KafkaConsumer<String, V>(this.kafkaClientFactory.getProperties());
-			kafkaConsumer.subscribe(Arrays.asList(kafkaClientFactory.getTopic()));
+			this.kafkaConsumer.subscribe(Arrays.asList(this.kafkaClientFactory.getTopic()));
 			start();
 		} catch (Exception e) {
+			this.kafkaConsumer.close();
+			print("kafkaConsumer closed!");
 			throw new Exception("org.asw.kafkafactory.ConsumerGeneric<V>.subscribe()", e);
 		}
 		return this;
@@ -269,7 +269,7 @@ public class ConsumerGeneric<V> {
 		  try {
 		  	Map<String, List<PartitionInfo>> m = this.kafkaConsumer.listTopics();
 		    for (Map.Entry<String, List<PartitionInfo>> entry : m.entrySet()) {
-		    	kafkaClientFactory.print(entry.getKey());
+		    	print(entry.getKey());
 		    }
 		  } finally {
 		  	this.kafkaConsumer.close();
@@ -289,7 +289,6 @@ public class ConsumerGeneric<V> {
 		String metaData = new ObjectMapper().writeValueAsString(new RecordMetadata(record));
 
 		LocalDateTime start = LocalDateTime.now();
-		// cf.print("startTime Processing: "+start.toString());
 		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery()) && kafkaClientFactory.jdbcConnection() != null) {
 			try (CallableStatement stmt = kafkaClientFactory.jdbcConnection().prepareCall("{ call " + kafkaClientFactory.getJdbcQuery() + " }")) {
 				switch (stmt.getParameterMetaData().getParameterCount()) {
@@ -299,7 +298,7 @@ public class ConsumerGeneric<V> {
 					try {
 						stmt.setString(1, value);
 					} catch (Exception e) {
-						kafkaClientFactory.print("setString(1) failed: " + e.toString());
+						print("setString(1) failed: " + e.toString());
 						throw new Exception(e);
 					}
 					break;
@@ -308,7 +307,7 @@ public class ConsumerGeneric<V> {
 						stmt.setString(1, value);
 						stmt.setString(2, metaData);
 					} catch (Exception e) {
-						kafkaClientFactory.print("setString(2) failed: " + e.toString());
+						print("setString(2) failed: " + e.toString());
 						throw new Exception(e);
 					}
 					break;
