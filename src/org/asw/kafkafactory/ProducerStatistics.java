@@ -31,7 +31,7 @@ public class ProducerStatistics {
     i++;
   }
 
-  private int getI() {
+  public int getI() {
   	return this.i;
   }
   /**

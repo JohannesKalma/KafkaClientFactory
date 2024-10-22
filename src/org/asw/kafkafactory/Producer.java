@@ -1,9 +1,6 @@
 package org.asw.kafkafactory;
 
-import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Types;
 
@@ -42,22 +39,7 @@ public class Producer {
 
 	ProducerStatistics stats;
 	
-	boolean printCallbackMetaData = false;
-
-	int messageCount;
-
-//	/**
-//	 * Constructor instantiate a Producer (either String or AVRO)
-//	 * 
-//	 * @param cf KafkaClientFactory instance
-//	 * @param p  PrintWriter needed for printing (jcsOut in RMJ)
-//	 * @throws Exception generic exception
-//	 */
-//	public Producer(KafkaClientFactory cf, PrintWriter p) throws Exception {
-//		this(cf);
-//		this.printwriter = p;
-//		this.messageCount = 0;
-//	}
+	boolean printRecordMetaData = false;
 
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
@@ -90,11 +72,10 @@ public class Producer {
 			if (KafkaUtil.isNotBlank(this.kafkaClientFactory.getJdbcQuery())) {
 				publishFromRefCursor();
 			} else {
-				if (this.kafkaClientFactory.publishValue() != null) {
-					if (this.kafkaClientFactory.publishValue() instanceof SpecificRecord
-							|| this.kafkaClientFactory.publishValue() instanceof String) {
+				if (this.kafkaClientFactory.publishValue() != null 
+					  && (this.kafkaClientFactory.publishValue() instanceof SpecificRecord
+							  || this.kafkaClientFactory.publishValue() instanceof String )) {
 						publishSingleMessage();
-					}
 				} else {
 					throw new Exception("Nothing to publish. Expecting either a jdbcQuery OR a value!");
 				}
@@ -134,11 +115,10 @@ public class Producer {
 								(String) kafkaClientFactory.publishValue()))
 						.get();
 			}
-
-			this.printRecordMetaData();
-			
 		} catch (Exception e) {
 			throw new Exception("org.asw.kafkafactory.Producer.publishSingleMessage()", e);
+		} finally {
+			this.printRecordMetaData();
 		}
 
 		return this;
@@ -156,20 +136,19 @@ public class Producer {
 				rset.setFetchSize(1000);
 				while (rset.next()) {
 					this.stats.incrI();
-					//BigDecimal bdid = rset.getBigDecimal(1);
-					String id = String.valueOf(rset.getBigDecimal(1)); //   bdid.toString();
+					String id = String.valueOf(rset.getBigDecimal(1));
           
 					kafkaClientFactory.setTopic(rset.getString(2));
 					kafkaClientFactory.setKey(rset.getString(3));
 					kafkaClientFactory.setValue(rset.getString(4));
           
 					if ((KafkaUtil.isNotBlank(kafkaClientFactory.getTopic()) && KafkaUtil.isNotBlank(kafkaClientFactory.getValue()))) { 
-   					this.publishWithCallback(id);
+   					this.publishWithCallback(id,this.stats.getI());
 					} else {
 						try {
 						  print(String.format("cursor % returned invalid topic and/or value. Got parametervalues: %s, %s, %s, %s", rset.getCursorName(),String.valueOf(rset.getBigDecimal(1)),rset.getString(2),rset.getString(3),rset.getString(4)));
 						} catch (Exception e) {
-							print("cursor did returned invalid values");
+							print("cursor returned invalid values");
 						}
 					}
 				}
@@ -183,21 +162,17 @@ public class Producer {
 		return this;
 	}
 	
-	private Producer publishWithCallback(String messageId) throws Exception {
+	private Producer publishWithCallback(String messageId,Integer i) throws Exception {
 		try {
 			if (kafkaClientFactory.publishValue() instanceof SpecificRecord) {
-				this.kafkaProducerAVRO.send(
-						new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-								(SpecificRecord) kafkaClientFactory.publishValue()),
-						//new ProducerCallback(messageId, this.printCallbackMetaData));
-				    new ProducerCallback(messageId));
+				this.kafkaProducerAVRO.send(new ProducerRecord<String, SpecificRecord>(kafkaClientFactory.getTopic(),
+						kafkaClientFactory.getKey(), (SpecificRecord) kafkaClientFactory.publishValue()),
+						new ProducerCallback(messageId, i));
 			}
-			if (kafkaClientFactory.publishValue() instanceof String) {
-				this.kafkaProducerString.send(
-						new ProducerRecord<String, String>(kafkaClientFactory.getTopic(), kafkaClientFactory.getKey(),
-								(String) kafkaClientFactory.publishValue()),
-						//new ProducerCallback(messageId, this.printCallbackMetaData));
-						new ProducerCallback(messageId));
+			if (this.kafkaClientFactory.publishValue() instanceof String) {
+				this.kafkaProducerString.send(new ProducerRecord<String, String>(kafkaClientFactory.getTopic(),
+						kafkaClientFactory.getKey(), (String) kafkaClientFactory.publishValue()),
+						new ProducerCallback(messageId, i));
 			}
 		} catch (Exception e) {
 			throw new Exception("org.asw.kafkafactory.Producer.publishWithCallback",e);
@@ -208,30 +183,37 @@ public class Producer {
 	private class ProducerCallback implements Callback {
 
 		String messageId;
-		//boolean doPrintMetadata = false;
-
-		//public ProducerCallback(String messageId, boolean doPrintMetadata) {
-		public ProducerCallback(String messageId) {
+		Integer i;
+		public ProducerCallback(String messageId,Integer i) {
 			this.messageId = messageId;
-			//this.doPrintMetadata = doPrintMetadata;
+			this.i = i;
 		}
 
+		private void printMeta(RecordMetadata m) {
+		  print(String.format("Published messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",
+				this.messageId, m.topic(), m.partition(), m.offset(), m.timestamp()));			
+		}
+		
 		@Override
 		public void onCompletion(RecordMetadata m, Exception e) {
 			if (e != null) {
-				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s%n",
+				print(String.format("Error messageId: %s, topic: %s, partition: %s, offset: %s, errormessage: %s",
 						this.messageId, m.topic(), m.partition(), m.offset(), e.toString()));
-			} //else {
-				//if (doPrintMetadata) {
-					//print(String.format("Succes messageId: %s, topic: %s, partition: %s, offset: %s, timestamp: %s",
-					//		this.messageId, m.topic(), m.partition(), m.offset(), m.timestamp()));
-				//}
-			//}
+			} else {
+				print("first published message:");
+				printMeta(m);
+				if ((i>1 && i < 100) && printRecordMetaData) {
+						printMeta(m);
+				} else if (i == 100 || i==1000 || i==1000) {
+					print(String.format("more than %s messages produced ....",i));
+					printMeta(m);
+				}
+			}
 		}
 	}
 
 	private void print(String s) {
-		this.kafkaClientFactory.print(s);
+		kafkaClientFactory.print(s);
 	}
 
 	/**
@@ -242,12 +224,12 @@ public class Producer {
 	 * @return This Producer (to allow chaining)
 	 */
 	public Producer printMetadata() {
-		this.printCallbackMetaData = true;
+		this.printRecordMetaData = true;
 		return this;
 	}
 	
 	private void printRecordMetaData() {
-		if (this.recordMetadata != null && printCallbackMetaData ) {
+		if (this.recordMetadata != null && this.printRecordMetaData ) {
 			print("==== Producer MetaData ====");
 			print(String.format("topic: %s", this.recordMetadata.topic()));
 			print(String.format("partition: %s", this.recordMetadata.partition()));
@@ -255,5 +237,4 @@ public class Producer {
 			print(String.format("timestamp: %s", this.recordMetadata.timestamp()));
 		}
 	}
-
 }
