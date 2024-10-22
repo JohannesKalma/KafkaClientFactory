@@ -317,6 +317,7 @@ public class ConsumerGeneric<V> {
 
 				stmt.execute();
 			} catch (SQLException e) {
+				deadLetter(metaData);
 				this.errorCount++;
 				kafkaClientFactory.print(e.toString());
 				if (this.errorCount >= this.maxErrorCount) {
@@ -340,6 +341,10 @@ public class ConsumerGeneric<V> {
   		kafkaClientFactory.print(String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
   				Duration.between(start, end).toMillis()));
     }
+	}
+	
+	private void deadLetter(String metadata) {
+		//
 	}
 	
 	class RecordMetadata{
