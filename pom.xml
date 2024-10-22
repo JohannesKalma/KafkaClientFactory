@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>KafkaFactory</groupId>
 	<artifactId>KafkaClientFactory</artifactId>
-	<version>1_0_11_1</version>
+	<version>1.0.11.2</version>
 	<name>KafkaFactory</name>
 	<description>Kafka Factory Consumer and Producer Wrapper and DTO builder</description>
 	<packaging>jar</packaging>
@@ -20,19 +20,19 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.16.1</version>
+			<version>2.18.0</version>
 		</dependency>
 		<!--  https://mvnrepository.com/artifact/io.confluent/kafka-connect-avro-converter -->
 		<dependency>
 			<groupId>io.confluent</groupId>
 			<artifactId>kafka-connect-avro-converter</artifactId>
-			<version>7.5.1</version>
+			<version>7.7.1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.avro/avro-compiler -->
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro-compiler</artifactId>
-			<version>1.11.3</version>
+			<version>1.12.0</version>
 		</dependency>
 		<!--  https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10  -->
 		<dependency>
