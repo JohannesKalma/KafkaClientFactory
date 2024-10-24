@@ -114,6 +114,7 @@ public class SchemaDTOBuilder {
 		this.prop = cf.getProperties();
 		this.topic = cf.getTopic();
 		this.printwriter = cf.getPrintwriter();
+		//this.logPrintwriter = cf.getKafkaProcessLogPrintWriter(); 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Map<String, String> propMap = (Map) prop;
 		this.schemaRegistryClient = new CachedSchemaRegistryClient((String) prop.get("schema.registry.url"), 10000, propMap);
@@ -127,6 +128,7 @@ public class SchemaDTOBuilder {
 		} else {
 			System.out.println(s);
 		}
+		//this.logPrintwriter.println(s);
 	}
 
 	public SchemaDTOBuilder printAllVersions() throws Exception {
