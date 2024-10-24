@@ -773,6 +773,24 @@ public class KafkaClientFactory {
 	}
 	
 	/**
+	 * Print a string to the KafkaProcessLogPrintWriter
+	 * 
+	 * @param m String
+	 */
+	public void printLog(String m) {
+		this.kafkaProcessLogPrintWriter.println(m);
+	}
+	
+	/**
+	 * Print a string to the DeadLetterPrintWriter
+	 * 
+	 * @param m String
+	 */
+	public void printDL(String m) {
+		this.deadLetterPrintWriter.println(m);
+	}
+	
+	/**
 	 * Print a key value string to the PrintWriter
 	 * 
 	 * @param k key String
