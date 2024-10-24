@@ -85,6 +85,8 @@ public class KafkaClientFactory {
 	Credentials jdbcCredentials;
 	String jdbcQuery;
 	PrintWriter printwriter;
+	PrintWriter deadLetterPrintWriter;
+	PrintWriter kafkaProcessLogPrintWriter;
 	Connection jdbcConnection;
 	String maxErrorCount;
 
@@ -116,6 +118,22 @@ public class KafkaClientFactory {
 	public KafkaClientFactory setPrintwriter(PrintWriter printwriter) {
 		this.printwriter = printwriter;
 		return this;
+	}
+	
+	public PrintWriter getDeadLetterPrintWriter() {
+		return deadLetterPrintWriter;
+	}
+
+	public void setDeadLetterPrintWriter(PrintWriter deadLetterPrintWriter) {
+		this.deadLetterPrintWriter = deadLetterPrintWriter;
+	}
+
+	public PrintWriter getKafkaProcessLogPrintWriter() {
+		return kafkaProcessLogPrintWriter;
+	}
+
+	public void setKafkaProcessLogPrintWriter(PrintWriter kafkaProcessLogPrintWriter) {
+		this.kafkaProcessLogPrintWriter = kafkaProcessLogPrintWriter;
 	}
 
 	/**
@@ -838,6 +856,8 @@ public class KafkaClientFactory {
 	 */
 	public KafkaClientFactory() {
 		this.printwriter = new PrintWriter(System.out,true);
+		this.deadLetterPrintWriter = new PrintWriter(System.out,true);
+		this.kafkaProcessLogPrintWriter = new PrintWriter(System.out,true);
 	}
 	
 	public KafkaClientFactory(PrintWriter printwriter) {
