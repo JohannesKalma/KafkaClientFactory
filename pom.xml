@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>KafkaFactory</groupId>
-	<artifactId>KafkaClientFactory</artifactId>
-	<version>1.0.11.2</version>
-	<name>KafkaFactory</name>
-	<description>Kafka Factory Consumer and Producer Wrapper and DTO builder</description>
+	<artifactId>kafka-client-factory</artifactId>
+	<version>1.0.11.5</version>
+	<name>KafkaClientFactory</name>
+	<description>Kafka Client Factory Consumer and Producer Wrapper and DTO builder</description>
 	<packaging>jar</packaging>
 
 	<repositories>
@@ -15,24 +15,25 @@
 	</repositories>
 
 	<dependencies>
-	 
+
 		<!--  https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind  -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.18.0</version>
 		</dependency>
-		<!--  https://mvnrepository.com/artifact/io.confluent/kafka-connect-avro-converter -->
-		<dependency>
-			<groupId>io.confluent</groupId>
-			<artifactId>kafka-connect-avro-converter</artifactId>
-			<version>7.7.1</version>
-		</dependency>
+<!-- https://mvnrepository.com/artifact/io.confluent/kafka-connect-avro-converter -->
+<dependency>
+    <groupId>io.confluent</groupId>
+    <artifactId>kafka-connect-avro-converter</artifactId>
+    <version>7.8.0</version>
+</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.avro/avro-compiler -->
+		<!-- do not upgrade to 1.12.0, DTO generator fails -->
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro-compiler</artifactId>
-			<version>1.12.0</version>
+			<version>1.11.4</version>
 		</dependency>
 		<!--  https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc10  -->
 		<dependency>
@@ -56,7 +57,7 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<version>9.0.0</version>
 		</dependency>
-		
+
 	</dependencies>
 	<build>
 		<sourceDirectory>src/</sourceDirectory>
@@ -92,24 +93,24 @@
 					</excludes>
 				</configuration>
 			</plugin>
-<plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-assembly-plugin</artifactId>
-      <configuration>
-          <descriptorRefs>
-              <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-      </configuration>
-      <executions>
-          <execution>
-              <id>make-assembly</id>
-              <phase>package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-          </execution>
-      </executions>
-    </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
