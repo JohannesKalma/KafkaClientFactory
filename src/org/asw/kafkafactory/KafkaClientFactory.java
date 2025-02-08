@@ -89,6 +89,15 @@ public class KafkaClientFactory {
 	PrintWriter kafkaProcessLogPrintWriter;
 	Connection jdbcConnection;
 	String maxErrorCount;
+	String duration;
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
 
 	public String getMaxErrorCount() {
 		return maxErrorCount;
@@ -878,8 +887,11 @@ public class KafkaClientFactory {
 		this.kafkaProcessLogPrintWriter = new PrintWriter(System.out,true);
 	}
 	
-	public KafkaClientFactory(PrintWriter printwriter) {
-		this.printwriter = printwriter;
-	}
+	/** 
+	 * deprecated constructor 
+	 * */
+	//public KafkaClientFactory(PrintWriter printwriter) {
+	//	this.printwriter = printwriter;
+	//}
 
 }
