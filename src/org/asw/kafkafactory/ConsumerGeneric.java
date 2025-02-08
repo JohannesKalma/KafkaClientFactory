@@ -1,7 +1,6 @@
 package org.asw.kafkafactory;
 
 import java.sql.CallableStatement;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -14,6 +13,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -23,13 +23,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 
 public class ConsumerGeneric<V> {
-
+	
 	private KafkaClientFactory kafkaClientFactory;
 	private long timer;
 	private Integer errorCount;
 	private boolean doPrintValues;
-	private boolean doPrintMetadata;
-	private boolean doPrintProcessingdata;
+	//private boolean doPrintMetadata;
+	//private boolean doPrintProcessingdata;
 	private KafkaConsumer<String, V> kafkaConsumer;
 
 	private Long startTime;
@@ -44,17 +44,17 @@ public class ConsumerGeneric<V> {
 	 * @param cf instance of KafkaClientFactory
 	 * @throws Exception 
 	 */
-	public ConsumerGeneric(KafkaClientFactory cf) throws Exception {
-		this.kafkaClientFactory = cf;
+	public ConsumerGeneric(KafkaClientFactory kafkaClientFactory) throws Exception {
+		this.kafkaClientFactory = kafkaClientFactory;
 		this.errorCount = 0;
-		
-		if (cf.getMaxErrorCount() == null) {
+
+		if (KafkaUtil.isBlank(this.kafkaClientFactory.getMaxErrorCount())) {
 			this.maxErrorCount = 100;
 		} else {
 			try {
-			  this.maxErrorCount = Integer.parseInt(cf.getMaxErrorCount());
+			  this.maxErrorCount = Integer.parseInt(kafkaClientFactory.getMaxErrorCount());
 			} catch (Exception e) {
-				throw new Exception(String.format("maxErrorCount should be an integer above zero"));				
+				throw new Exception(String.format("maxErrorCount should be an integer above zero"));
 			}
 		}
 	
@@ -63,8 +63,11 @@ public class ConsumerGeneric<V> {
 		try {
 		  this.kafkaConsumer = new KafkaConsumer<String, V>(this.kafkaClientFactory.getProperties());
 		} catch (Exception e) {
-			this.kafkaConsumer.close();
-      print("kafkaConsumer closed!");
+			if (this.kafkaConsumer != null) {
+			 this.kafkaConsumer.close();
+			 print("kafkaConsumer closed!");
+			}
+      
 			throw new Exception ("org.asw.kafkafactory.ConsumerGeneric<V>.ConsumerGeneric(KafkaClientFactory cf)",e);
 		} 
 	}
@@ -85,7 +88,7 @@ public class ConsumerGeneric<V> {
 	 * @return This ConsumerGeneric (to allow chaining)
 	 */
 	public ConsumerGeneric<V> printMetadata() {
-		doPrintMetadata = true;
+		//doPrintMetadata = true;
 		return this;
 	}
 	
@@ -95,7 +98,7 @@ public class ConsumerGeneric<V> {
 	 * @return This ConsumerGeneric (to allow chaining)
 	 */
 	public ConsumerGeneric<V> printProcessingdata() {
-		doPrintProcessingdata = true;
+		//doPrintProcessingdata = true;
 		return this;
 	}
 
@@ -126,10 +129,12 @@ public class ConsumerGeneric<V> {
 		try {
 			startTime = System.currentTimeMillis();
 
-			print("=== Consumer start ===");
-			print(startTime.toString());
-			print("Timer " + this.timer);
-			print("Start Iterator: " + LocalDateTime.now().toString());
+			print("Consumer start");
+			print(String.format("servers - %s",this.kafkaClientFactory.getBootstrapServers()));
+			print(String.format("groupId - %s",this.kafkaConsumer.groupMetadata().groupId()));
+			print(String.format("topic - %s",this.kafkaClientFactory.getTopic()));
+			print(String.format("Timer %s ms",this.timer));
+			print(String.format("Start Iterator %s", LocalDateTime.now().toString()));
 			while (keepIterating()) {
 				ConsumerRecords<String, V> records = this.kafkaConsumer.poll(Duration.ofMillis(1000));
 				for (ConsumerRecord<String, V> record : records) {
@@ -166,10 +171,15 @@ public class ConsumerGeneric<V> {
 	 * @throws Exception generic exception (should not crash)
 	 */
 	public ConsumerGeneric<V> subscribe() throws Exception {
-		
 		this.doCommit = true;
 		try {
-			this.kafkaConsumer.subscribe(Arrays.asList(this.kafkaClientFactory.getTopic()));
+			//original
+			//this.kafkaConsumer.subscribe(Arrays.asList(this.kafkaClientFactory.getTopic()));
+			//read elements from string
+			List<String> topicList = Arrays.asList(this.kafkaClientFactory.getTopic().split(","));
+			//create immutable list
+			//List<String> topicList = java.util.Arrays.stream(this.kafkaClientFactory.getTopic().split(",")).toList();
+			this.kafkaConsumer.subscribe(topicList);
 			start();
 		} catch (Exception e) {
 			this.kafkaConsumer.close();
@@ -210,23 +220,32 @@ public class ConsumerGeneric<V> {
 	 * @param t typeTimer
 	 */
 	public ConsumerGeneric<V> setTimer(typeTimer t) {
-		switch (t) {
-		case ZERO:
-			this.timer = 0;
-			break;
-		case DAY_MILLIS:
-			this.timer = 1000 * 60 * 60 * 24;
-			break;
-		case HOUR_MILLIS:
-			this.timer = 1000 * 60 * 60;
-			break;
-		case MINUTE_MILLIS:
-			this.timer = 1000 * 60;
-			break;
-		default:
-			this.timer = 0;
+		if ( KafkaUtil.isNotBlank(kafkaClientFactory.getDuration())) {
+			try {
+        this.timer = Duration.parse(kafkaClientFactory.getDuration()).toMillis();
+			} catch (Exception e) {
+				print(String.format("Duration value %s incorrect.",kafkaClientFactory.getDuration()));
+				print(String.format("Expecting a string in format 'PT59M' when 59 minutes is meant."));
+				print(String.format("Hint: Search Google for ISO 8601 documentation"));
+			}
+		} else {
+			switch (t) {
+			case ZERO:
+				this.timer = 0;
+				break;
+			case DAY_MILLIS:
+				this.timer = 1000 * 60 * 60 * 24;
+				break;
+			case HOUR_MILLIS:
+				this.timer = 1000 * 60 * 60;
+				break;
+			case MINUTE_MILLIS:
+				this.timer = 1000 * 60;
+				break;
+			default:
+				this.timer = 0;
+			}
 		}
-
 		return this;
 	}
 
@@ -255,7 +274,8 @@ public class ConsumerGeneric<V> {
 	}
 	
 	private void print(String s) {
-		this.kafkaClientFactory.print(s);
+		//this.kafkaClientFactory.print(s);
+		this.kafkaClientFactory.printLog(s);
 	}
 	
 	
@@ -286,7 +306,7 @@ public class ConsumerGeneric<V> {
 	public void processData(ConsumerRecord<String, V> record) throws Exception {
 
 		String value = record.value().toString();
-		String metaData = new ObjectMapper().writeValueAsString(new RecordMetadata(record));
+		String metaData = new ObjectMapper().writeValueAsString(new ConsumerRecordMetaDataDTO(record));
 
 		LocalDateTime start = LocalDateTime.now();
 		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery()) && kafkaClientFactory.jdbcConnection() != null) {
@@ -316,10 +336,10 @@ public class ConsumerGeneric<V> {
 				}
 
 				stmt.execute();
-			} catch (SQLException e) {
-				deadLetter(metaData);
+			} catch (Exception e) {
+				print(e.toString());
+				deadLetter(record);
 				this.errorCount++;
-				kafkaClientFactory.print(e.toString());
 				if (this.errorCount >= this.maxErrorCount) {
 					throw new Exception(String.format(
 							"Max number (%s) of Errors in KafkaConsumer.processData().%n Last Error Message: %s%n",
@@ -329,81 +349,31 @@ public class ConsumerGeneric<V> {
 		}
 
 		if (this.doPrintValues) {
-			kafkaClientFactory.print(value);
+			print(value);
 		}
-
-		if (this.doPrintMetadata) {
-			kafkaClientFactory.print(metaData);
-		}
-
-    if (this.doPrintProcessingdata) {
-  		LocalDateTime end = LocalDateTime.now();
-  		kafkaClientFactory.print(String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
-  				Duration.between(start, end).toMillis()));
-    }
-	}
-	
-	private void deadLetter(String metadata) {
-		//
-	}
-	
-	class RecordMetadata{
 		
-		public String getKey() {
-			return key;
-		}
+		print(metaData);
+ 		LocalDateTime end = LocalDateTime.now();
+ 		kafkaClientFactory.print(String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
+  				Duration.between(start, end).toMillis()));
 
-		public void setKey(String key) {
-			this.key = key;
-		}
-
-		public Long getOffset() {
-			return offset;
-		}
-
-		public void setOffset(Long offset) {
-			this.offset = offset;
-		}
-
-		public Integer getPartition() {
-			return partition;
-		}
-
-		public void setPartition(Integer partition) {
-			this.partition = partition;
-		}
-
-		public Long getTimestamp() {
-			return timestamp;
-		}
-
-		public void setTimestamp(Long timestamp) {
-			this.timestamp = timestamp;
-		}
-
-		public String getTopic() {
-			return topic;
-		}
-
-		public void setTopic(String topic) {
-			this.topic = topic;
-		}
-
-		String key;
-		Long offset;
-		Integer partition;
-		Long timestamp;
-		String topic;
-
-		/**
-		 * @param s
-		 */
-		public RecordMetadata(ConsumerRecord<String, V> record) {
-			this.key = record.key();
-			this.offset = record.offset();
-			this.partition = record.partition();
-			this.timestamp = record.timestamp();
-      this.topic = record.topic();
-		}
 	}
+	
+	private void deadLetter(ConsumerRecord<String, V> record) {
+			try {
+				String deadletterData = new ObjectMapper().writeValueAsString(new ConsumerDeadLetterDTO(record));
+				kafkaClientFactory.printDL(deadletterData);
+			} catch (JsonProcessingException e) {
+				print(String.format("Writing deadlettermessage for failed with %s",e.toString()));
+				try {
+					print(String.format("for %s", new ObjectMapper().writeValueAsString(new ConsumerRecordMetaDataDTO(record))));
+				} catch (Exception x) {
+					//
+				}
+				
+			}
+			
+	}
+	
+
 }
