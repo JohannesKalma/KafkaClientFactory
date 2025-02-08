@@ -47,8 +47,8 @@ public class Producer {
 	 * @param cf KafkaClientFactory instance
 	 * @throws Exception generic exception
 	 */
-	public Producer(KafkaClientFactory cf) throws Exception {
-		this.kafkaClientFactory = cf;
+	public Producer(KafkaClientFactory kafkaClientFactory) throws Exception {
+		this.kafkaClientFactory = kafkaClientFactory;
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class Producer {
 				if ((i>1 && i < 100) && printRecordMetaData) {
 						printMeta(m);
 				} else if (i == 100 || i==1000 || i==1000) {
-					print(String.format("more than %s messages produced ....",i));
+					print(String.format("more than %s messages published ....",i));
 					printMeta(m);
 				}
 			}
@@ -213,7 +213,8 @@ public class Producer {
 	}
 
 	private void print(String s) {
-		kafkaClientFactory.print(s);
+		//kafkaClientFactory.print(s);
+		kafkaClientFactory.printLog(s);
 	}
 
 	/**
