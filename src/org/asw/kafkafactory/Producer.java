@@ -44,7 +44,7 @@ public class Producer {
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
 	 * 
-	 * @param cf KafkaClientFactory instance
+	 * @param kafkaClientFactory KafkaClientFactory instance
 	 * @throws Exception generic exception
 	 */
 	public Producer(KafkaClientFactory kafkaClientFactory) throws Exception {

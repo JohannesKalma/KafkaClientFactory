@@ -10,7 +10,7 @@ public class Consumer extends ConsumerGeneric<String> {
 	/**
 	 * Initiate the generic consumer 
 	 * @param cf KafkaClientFactory instance
-	 * @throws Exception 
+	 * @throws Exception generic 
 	 */
 	public Consumer(KafkaClientFactory cf) throws Exception {
 		super(cf);

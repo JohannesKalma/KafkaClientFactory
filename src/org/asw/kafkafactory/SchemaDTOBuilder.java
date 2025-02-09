@@ -54,18 +54,37 @@ public class SchemaDTOBuilder {
 	String artifactPath;
 	String artifact;
 	
+	/**
+	 * getArtifactPath()
+	 * @return string
+	 */
 	public String getArtifactPath() {
 		return artifactPath;
 	}
-	
+
+	/**
+	 * getArtifact()
+	 * 
+	 * @return string
+	 */
 	public String getArtifact() {
 		return artifact;
 	}
 
+	/**
+	 * return kafkaClientFactory instance
+	 * 
+	 * @return kafkaCleintFactory instance
+	 */
 	public KafkaClientFactory getKafkaClientFactory() {
 		return cf;
 	}
 
+	/**
+	 * setKafkaClientFactory
+	 * 
+	 * @param cf KafkaClientFactory instance
+	 */
 	public void setKafkaClientFactory(KafkaClientFactory cf) {
 		this.cf = cf;
 	}
@@ -123,7 +142,7 @@ public class SchemaDTOBuilder {
 	}
 
 	private void print(String s) {
-		if (cf != null && cf.printwriter != null) {
+		if (cf != null && cf.getPrintwriter() != null) {
 			cf.print(s);
 		} else {
 			System.out.println(s);
@@ -131,6 +150,12 @@ public class SchemaDTOBuilder {
 		//this.logPrintwriter.println(s);
 	}
 
+	/**
+	 * printAllVersions()
+	 * 
+	 * @return class instance
+	 * @throws Exception generic
+	 */
 	public SchemaDTOBuilder printAllVersions() throws Exception {
 		List<Integer> versionList = this.schemaRegistryClient.getAllVersions(this.topic+"-value");
 		
@@ -149,28 +174,57 @@ public class SchemaDTOBuilder {
 		return this.schemaRegistryClient.getLatestSchemaMetadata(subject);
 	}
 	
+	/**
+	 * printSchema()
+	 * 
+	 * @return class instance
+	 * @throws Exception generic
+	 */
 	public SchemaDTOBuilder printSchemaId() throws Exception {
 		print("SchemaId: "+String.valueOf(this.schemaRegistryClient.getLatestSchemaMetadata(this.topic+"-value").getId()));
 		
 		return this;
 	}
 	
+	/**
+	 * enum schemTypeEnum
+	 * 
+	 **/
 	public enum schemaTypeEnum{
-		KEY,VALUE
+		/**KEY**/
+		KEY,
+		/**VALUE**/
+		VALUE
 	}
 	
 	schemaTypeEnum schemaType = schemaTypeEnum.VALUE;
 	
+	/**
+	 * setSchemaKey()
+	 * 
+	 * @return class instance
+	 */
 	public SchemaDTOBuilder setSchemaTypeKey(){
 		this.schemaType = schemaTypeEnum.KEY;
 		return this;
 	}
 	
+	/**
+	 * setSchemaTypeValue()
+	 * 
+	 * @return class instance
+	 */
 	public SchemaDTOBuilder setSchemaTypeValue(){
 		this.schemaType = schemaTypeEnum.VALUE;
 		return this;
 	}
 	
+	/**
+	 * setSchemaType()
+	 * 
+	 * @param schemaType enum
+	 * @return class instance
+	 */
 	public SchemaDTOBuilder setSchemaType(schemaTypeEnum schemaType) {
 		this.schemaType = schemaType;
 		return this;
@@ -208,8 +262,13 @@ public class SchemaDTOBuilder {
     return this;
 	}
 
-	
-	
+	/**
+	 * listSchemas()
+	 * 
+	 * @param find schema name
+	 * @return class instance
+	 * @throws Exception generic
+	 */
 	public SchemaDTOBuilder listSchemas(String find) throws Exception {
 		Collection<String> c = this.schemaRegistryClient.getAllSubjects();
 		for (String s : c) {
@@ -285,10 +344,22 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 	
+	/**
+	 * buildClassPath
+	 * 
+	 * @param path string
+	 * @return class instance
+	 */
 	public SchemaDTOBuilder buildClassPath(String path) {
 		return setBuilderClassPath(path);
 	}
 	
+	/**
+	 * setBuilderClassPath
+	 * 
+	 * @param path string
+	 * @return class instance
+	 */
 	public SchemaDTOBuilder setBuilderClassPath(String path) {
 		
 		StringBuilder classPath = new StringBuilder();
@@ -352,7 +423,7 @@ public class SchemaDTOBuilder {
 		
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		
-		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.printwriter, fileManager, diagnostics, compilerOptions, null, compilationUnits);
+		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.getPrintwriter(), fileManager, diagnostics, compilerOptions, null, compilationUnits);
 		task.call();
 		
 		if (diagnostics.getDiagnostics().size()>0) {
@@ -380,9 +451,9 @@ public class SchemaDTOBuilder {
   /**
    * Write all sources and compiled classes into a valid jar file with a standard MANIFEST
    * 
+   * @return class instance
    * @throws Exception - generic Exception
    */
-
 	public SchemaDTOBuilder buildArtifact() throws Exception {
 		Path sourcePath = Path.of(this.srcDir.toURI());
 
@@ -417,6 +488,9 @@ public class SchemaDTOBuilder {
 		return this;
 	}
 	
+	/**
+	 * print BullshitData()
+	 */
 	public void generateBullshitData(){
     Iterator<Object> it = new RandomData(this.schema, 1).iterator();
     System.out.println(it.next());

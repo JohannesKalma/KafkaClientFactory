@@ -41,8 +41,8 @@ public class ConsumerGeneric<V> {
 	 * constructor<br>
 	 * start an instance of a KafkaConsumer
 	 * 
-	 * @param cf instance of KafkaClientFactory
-	 * @throws Exception 
+	 * @param kafkaClientFactory instance of KafkaClientFactory
+	 * @throws Exception generic exception
 	 */
 	public ConsumerGeneric(KafkaClientFactory kafkaClientFactory) throws Exception {
 		this.kafkaClientFactory = kafkaClientFactory;

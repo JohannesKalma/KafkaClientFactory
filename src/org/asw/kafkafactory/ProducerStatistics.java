@@ -31,13 +31,13 @@ public class ProducerStatistics {
     i++;
   }
 
-  public int getI() {
+  protected int getI() {
   	return this.i;
   }
   /**
    * Used for the publishFromRefCursor() method in the Producer
    */
-  public void printStats() {
+  protected void printStats() {
   	LocalDateTime now = LocalDateTime.now();
   	Duration duration = Duration.between(this.startTime,now);
 

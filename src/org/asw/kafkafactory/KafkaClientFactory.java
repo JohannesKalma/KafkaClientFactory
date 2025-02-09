@@ -67,42 +67,65 @@ import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
  * - jdbcQuery String<br>
  */
 public class KafkaClientFactory {
-	String bootstrapServers;
-	Credentials bootstrapServersCredentials;
-	String bootstrapServerTruststoreCertificate;
-	String groupId;
-	String schemaRegistryURL;
-	Credentials schemaRegistryCredentials;
-	String topic;
-	String className;
-	String partition;
-	String offset;
-	String value;
-	String key;
-	SpecificRecord specificRecord;
-	typeDeSer typeDeSer;
-	String jdbcUrl;
-	Credentials jdbcCredentials;
-	String jdbcQuery;
-	PrintWriter printwriter;
-	PrintWriter deadLetterPrintWriter;
-	PrintWriter kafkaProcessLogPrintWriter;
-	Connection jdbcConnection;
-	String maxErrorCount;
-	String duration;
-
+	//public
+	private String bootstrapServers;
+	private Credentials bootstrapServersCredentials;
+	private String bootstrapServerTruststoreCertificate;
+	private String groupId;
+	private String schemaRegistryURL;
+	private Credentials schemaRegistryCredentials;
+	private String topic;
+	private String className;
+	private String partition;
+	private String offset;
+	private String value;
+	private String key;
+	private typeDeSer typeDeSer;
+	private String jdbcUrl;
+	private Credentials jdbcCredentials;
+	private String jdbcQuery;
+	private String maxErrorCount;
+	private String duration;
+	
+	//private
+	//private SpecificRecord specificRecord;
+	protected PrintWriter printwriter;
+	protected PrintWriter deadLetterPrintWriter;
+	protected PrintWriter kafkaProcessLogPrintWriter;
+	protected Connection jdbcConnection;
+	
+	/**
+	 * get consumer duration in ISO 8601 format
+	 * 
+	 * @return String value
+	 */
 	public String getDuration() {
 		return duration;
 	}
 
+	/**
+	 * set consumer duration in ISO 8601 format
+	 * 
+	 * @param duration String
+	 */
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
 
+	/**
+	 * get maxErrorCount
+	 * 
+	 * @return String value
+	 */
 	public String getMaxErrorCount() {
 		return maxErrorCount;
 	}
 
+	/**
+	 * set maxError count, number of errors before consumer or producer quits.
+	 * 
+	 * @param maxErrorCount String
+	 */
 	public void setMaxErrorCount(String maxErrorCount) {
 		this.maxErrorCount = maxErrorCount;
 	}
@@ -112,7 +135,7 @@ public class KafkaClientFactory {
 	 * 
 	 * @return instance of PrintWriter
 	 */
-	public PrintWriter getPrintwriter() {
+	protected PrintWriter getPrintwriter() {
 		return printwriter;
 	}
 
@@ -129,18 +152,27 @@ public class KafkaClientFactory {
 		return this;
 	}
 	
-	public PrintWriter getDeadLetterPrintWriter() {
+	protected PrintWriter getDeadLetterPrintWriter() {
 		return deadLetterPrintWriter;
 	}
-
+  
+	/**
+	 * set the deadLetter Printwriter (needed for RMJ implementation)
+	 * 
+	 * @param deadLetterPrintWriter Printwriter object
+	 */
 	public void setDeadLetterPrintWriter(PrintWriter deadLetterPrintWriter) {
 		this.deadLetterPrintWriter = deadLetterPrintWriter;
 	}
 
-	public PrintWriter getKafkaProcessLogPrintWriter() {
+	protected PrintWriter getKafkaProcessLogPrintWriter() {
 		return kafkaProcessLogPrintWriter;
 	}
 
+  /**
+   * set kafkaClientFactory Process Log Printwriter (needed for RMJ implementation)
+   * @param kafkaProcessLogPrintWriter object
+   */
 	public void setKafkaProcessLogPrintWriter(PrintWriter kafkaProcessLogPrintWriter) {
 		this.kafkaProcessLogPrintWriter = kafkaProcessLogPrintWriter;
 	}
