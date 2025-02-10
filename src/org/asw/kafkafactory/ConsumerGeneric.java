@@ -33,7 +33,8 @@ public class ConsumerGeneric<V> {
 	private KafkaConsumer<String, V> kafkaConsumer;
 
 	private Long startTime;
-	private Integer iterator = 0;
+	private Integer timerZeroIterator = 0;
+	private Integer processedIterator = 0;
 	private boolean doCommit;
 	private Integer maxErrorCount;
 
@@ -111,8 +112,8 @@ public class ConsumerGeneric<V> {
 	public boolean keepIterating() {
 		boolean b = false;
 		if (this.timer == 0) {
-			b = iterator < 1;
-			iterator++;
+			b = timerZeroIterator < 1;
+			timerZeroIterator++;
 		} else {
 			b = System.currentTimeMillis() - this.startTime <= this.timer;
 		}
@@ -308,55 +309,64 @@ public class ConsumerGeneric<V> {
 		String value = record.value().toString();
 		String metaData = new ObjectMapper().writeValueAsString(new ConsumerRecordMetaDataDTO(record));
 
-		LocalDateTime start = LocalDateTime.now();
-		if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery()) && kafkaClientFactory.jdbcConnection() != null) {
-			try (CallableStatement stmt = kafkaClientFactory.jdbcConnection().prepareCall("{ call " + kafkaClientFactory.getJdbcQuery() + " }")) {
-				switch (stmt.getParameterMetaData().getParameterCount()) {
-				case 0:
-					throw new Exception(String.format("Assign at least 1 bindvariable!"));
-				case 1:
-					try {
-						stmt.setString(1, value);
-					} catch (Exception e) {
-						print("setString(1) failed: " + e.toString());
-						throw new Exception(e);
+		printMetadata(metaData);
+		
+		try {
+			if (KafkaUtil.isNotBlank(kafkaClientFactory.getJdbcQuery()) && kafkaClientFactory.jdbcConnection() != null) {
+				try (CallableStatement stmt = kafkaClientFactory.jdbcConnection().prepareCall("{ call " + kafkaClientFactory.getJdbcQuery() + " }")) {
+					switch (stmt.getParameterMetaData().getParameterCount()) {
+					case 0:
+						throw new Exception(String.format("Assign at least 1 bindvariable!"));
+					case 1:
+						try {
+							stmt.setString(1, value);
+						} catch (Exception e) {
+							//print("setString(1) failed: " + e.toString());
+							throw new Exception(e);
+						}
+						break;
+					case 2:
+						try {
+							stmt.setString(1, value);
+							stmt.setString(2, metaData);
+						} catch (Exception e) {
+							//print("setString(2) failed: " + e.toString());
+							throw new Exception(e);
+						}
+						break;
+					default:
+						throw new Exception(String.format("Max number bindvariables (2) exceeded!"));
 					}
-					break;
-				case 2:
-					try {
-						stmt.setString(1, value);
-						stmt.setString(2, metaData);
-					} catch (Exception e) {
-						print("setString(2) failed: " + e.toString());
-						throw new Exception(e);
-					}
-					break;
-				default:
-					throw new Exception(String.format("Max number bindvariables (2) exceeded!"));
-				}
-
-				stmt.execute();
-			} catch (Exception e) {
-				print(e.toString());
-				deadLetter(record);
-				this.errorCount++;
-				if (this.errorCount >= this.maxErrorCount) {
-					throw new Exception(String.format(
-							"Max number (%s) of Errors in KafkaConsumer.processData().%n Last Error Message: %s%n",
-							this.maxErrorCount,e.toString()));
+	
+					stmt.execute();
+				} catch (Exception e) {
+					//print(e.toString());
+					throw new Exception(e);
 				}
 			}
+		} catch (Exception e2) {
+			this.errorCount++;
+			print(e2.toString());
+			deadLetter(record);
+		} finally {
+			if (this.errorCount >= this.maxErrorCount) {
+				throw new Exception(String.format(
+						"Max number (%s) of Errors in KafkaConsumer.processData().%n",
+						this.maxErrorCount));
+			}			
 		}
-
-		if (this.doPrintValues) {
-			print(value);
+	}
+	
+	private void printMetadata(String metaData) {
+		this.processedIterator++;
+		Integer moduloDivisor = 100;
+		Integer processedIteratorModulo=this.processedIterator % moduloDivisor;
+ 	  if (this.processedIterator < moduloDivisor) {
+ 	  	print(metaData);
+		} else if ( processedIteratorModulo == moduloDivisor ) {
+			print(String.format("%s messages consumed ....",this.processedIterator));
+			print(metaData);
 		}
-		
-		print(metaData);
- 		LocalDateTime end = LocalDateTime.now();
- 		kafkaClientFactory.print(String.format("Processing Key: %s, End: %s, Duration: %s (ms) %n", record.key(), end.toString(),
-  				Duration.between(start, end).toMillis()));
-
 	}
 	
 	private void deadLetter(ConsumerRecord<String, V> record) {
@@ -370,10 +380,7 @@ public class ConsumerGeneric<V> {
 				} catch (Exception x) {
 					//
 				}
-				
 			}
-			
 	}
-	
 
 }
