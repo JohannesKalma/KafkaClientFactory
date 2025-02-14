@@ -6,14 +6,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
  * @author jkalma
  *
  */
-/**
- * @author jkalma
- *
- */
-/**
- * @author jkalma
- *
- */
 public class ConsumerDeadLetterDTO {
 
 	/**
@@ -53,6 +45,26 @@ public class ConsumerDeadLetterDTO {
 	}
 
 	String data;
+	String errorMessage;
+	
+	/**
+	 * getErrorMessage()
+	 * 
+	 * @return String errormessage
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * setErrorMessage()
+	 * 
+	 * @param errorMessage String
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	ConsumerRecordMetaDataDTO metaData;
 
 	/**
@@ -65,5 +77,19 @@ public class ConsumerDeadLetterDTO {
     metaData = new ConsumerRecordMetaDataDTO(record);
     this.data = record.value().toString();
 	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param <V> inherit from ConsumerRecord
+	 * @param record the kafka message
+	 */
+	public <V> ConsumerDeadLetterDTO(ConsumerRecord<String, V> record,String error) {
+    metaData = new ConsumerRecordMetaDataDTO(record);
+    this.data = record.value().toString();
+    this.errorMessage = error;
+	}
+	
+	
 
 }
