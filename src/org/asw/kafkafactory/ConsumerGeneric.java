@@ -27,7 +27,7 @@ public class ConsumerGeneric<V> {
 	private KafkaClientFactory kafkaClientFactory;
 	private long timer;
 	private Integer errorCount;
-	private boolean doPrintValues;
+	//private boolean doPrintValues;
 	//private boolean doPrintMetadata;
 	//private boolean doPrintProcessingdata;
 	private KafkaConsumer<String, V> kafkaConsumer;
@@ -47,6 +47,7 @@ public class ConsumerGeneric<V> {
 	 */
 	public ConsumerGeneric(KafkaClientFactory kafkaClientFactory) throws Exception {
 		this.kafkaClientFactory = kafkaClientFactory;
+		kafkaClientFactory.printInit();
 		this.errorCount = 0;
 
 		if (KafkaUtil.isBlank(this.kafkaClientFactory.getMaxErrorCount())) {
@@ -55,7 +56,7 @@ public class ConsumerGeneric<V> {
 			try {
 			  this.maxErrorCount = Integer.parseInt(kafkaClientFactory.getMaxErrorCount());
 			} catch (Exception e) {
-				throw new Exception(String.format("maxErrorCount should be an integer above zero"));
+				throw new Exception(String.format("maxErrorCount should be an integer"));
 			}
 		}
 	
@@ -73,35 +74,35 @@ public class ConsumerGeneric<V> {
 		} 
 	}
 
-	/**
-	 * dataprocessor also prints the Values.
-	 * 
-	 * @return This ConsumerGeneric (to allow chaining)
-	 */
-	public ConsumerGeneric<V> printValues() {
-		doPrintValues = true;
-		return this;
-	}
+	///**
+	// * dataprocessor also prints the Values.
+	// * 
+	// * @return This ConsumerGeneric (to allow chaining)
+	// */
+	//public ConsumerGeneric<V> printValues() {
+	//	//doPrintValues = true;
+	//	return this;
+	//}
 	
-	/**
-	 * dataprocessor also prints the Values.
-	 * 
-	 * @return This ConsumerGeneric (to allow chaining)
-	 */
-	public ConsumerGeneric<V> printMetadata() {
-		//doPrintMetadata = true;
-		return this;
-	}
+	// /**
+	// * dataprocessor also prints the Values.
+	// * 
+	// * @return This ConsumerGeneric (to allow chaining)
+	// */
+	//public ConsumerGeneric<V> printMetadata() {
+	//	//doPrintMetadata = true;
+	//	return this;
+	//}
 	
-	/**
-	 * dataprocessor also prints the Values.
-	 * 
-	 * @return This ConsumerGeneric (to allow chaining)
-	 */
-	public ConsumerGeneric<V> printProcessingdata() {
-		//doPrintProcessingdata = true;
-		return this;
-	}
+	// /**
+	// * dataprocessor also prints the Values.
+	// * 
+	// * @return This ConsumerGeneric (to allow chaining)
+	// */
+	//public ConsumerGeneric<V> printProcessingdata() {
+	//	//doPrintProcessingdata = true;
+	//	return this;
+	//}
 
 	/**
 	 * 1. when seek, then no timer (value=0), subscriber should then iterate exactly
@@ -304,7 +305,7 @@ public class ConsumerGeneric<V> {
 	 * @param record - the complete ConsumerRecord
 	 * @throws Exception generic exception
 	 */
-	public void processData(ConsumerRecord<String, V> record) throws Exception {
+	private void processData(ConsumerRecord<String, V> record) throws Exception {
 
 		String value = record.value().toString();
 		String metaData = new ObjectMapper().writeValueAsString(new ConsumerRecordMetaDataDTO(record));
@@ -321,7 +322,6 @@ public class ConsumerGeneric<V> {
 						try {
 							stmt.setString(1, value);
 						} catch (Exception e) {
-							//print("setString(1) failed: " + e.toString());
 							throw new Exception(e);
 						}
 						break;
@@ -330,7 +330,6 @@ public class ConsumerGeneric<V> {
 							stmt.setString(1, value);
 							stmt.setString(2, metaData);
 						} catch (Exception e) {
-							//print("setString(2) failed: " + e.toString());
 							throw new Exception(e);
 						}
 						break;
@@ -347,7 +346,7 @@ public class ConsumerGeneric<V> {
 		} catch (Exception e2) {
 			this.errorCount++;
 			print(e2.toString());
-			deadLetter(record);
+			deadLetter(record,e2.toString());
 		} finally {
 			if (this.errorCount >= this.maxErrorCount) {
 				throw new Exception(String.format(
@@ -363,18 +362,18 @@ public class ConsumerGeneric<V> {
 		Integer processedIteratorModulo=this.processedIterator % moduloDivisor;
  	  if (this.processedIterator < moduloDivisor) {
  	  	print(metaData);
-		} else if ( processedIteratorModulo == moduloDivisor ) {
+		} else if ( processedIteratorModulo == 0 ) {
 			print(String.format("%s messages consumed ....",this.processedIterator));
 			print(metaData);
 		}
 	}
 	
-	private void deadLetter(ConsumerRecord<String, V> record) {
+	private void deadLetter(ConsumerRecord<String, V> record,String error) {
 			try {
-				String deadletterData = new ObjectMapper().writeValueAsString(new ConsumerDeadLetterDTO(record));
+				String deadletterData = new ObjectMapper().writeValueAsString(new ConsumerDeadLetterDTO(record,error));
 				kafkaClientFactory.printDL(deadletterData);
 			} catch (JsonProcessingException e) {
-				print(String.format("Writing deadlettermessage for failed with %s",e.toString()));
+				print(String.format("Writing deadlettermessage failed with %s",e.toString()));
 				try {
 					print(String.format("for %s", new ObjectMapper().writeValueAsString(new ConsumerRecordMetaDataDTO(record))));
 				} catch (Exception x) {

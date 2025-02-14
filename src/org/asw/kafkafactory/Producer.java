@@ -49,6 +49,7 @@ public class Producer {
 	 */
 	public Producer(KafkaClientFactory kafkaClientFactory) throws Exception {
 		this.kafkaClientFactory = kafkaClientFactory;
+		kafkaClientFactory.printInit();
 	}
 
 	/**
