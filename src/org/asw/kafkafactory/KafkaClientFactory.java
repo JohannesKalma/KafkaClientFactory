@@ -856,14 +856,14 @@ public class KafkaClientFactory {
 		
 		switch (this.getPrintProperties()) {
 		case Y:
-			this.printParameters();
+			this.printProperties();
 		default:
 			break;
 		}
-		
+
 		switch (this.getPrintInfo()) {
 		case Y:
-			this.printParameters();
+			this.printInfo();
 		default:
 			break;
 		}
@@ -985,6 +985,9 @@ public class KafkaClientFactory {
 		//this.printwriter = new PrintWriter(System.out,true);
 		this.deadLetterPrintWriter = new PrintWriter(System.out,true);
 		this.kafkaProcessLogPrintWriter = new PrintWriter(System.out,true);
+		this.setPrintInfo(yesNo.N);
+		this.setPrintParameters(yesNo.N);
+		this.setPrintProperties(yesNo.N);
 	}
 	
 	/** 
