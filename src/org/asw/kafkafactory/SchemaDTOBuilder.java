@@ -132,7 +132,7 @@ public class SchemaDTOBuilder {
 		this.cf = kafkaClientFactory;
 		this.prop = cf.getProperties();
 		this.topic = cf.getTopic();
-		this.printwriter = cf.getPrintwriter();
+		this.printwriter = cf.getKafkaProcessLogPrintWriter();
 		//this.logPrintwriter = cf.getKafkaProcessLogPrintWriter(); 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Map<String, String> propMap = (Map) prop;
@@ -142,7 +142,7 @@ public class SchemaDTOBuilder {
 	}
 
 	private void print(String s) {
-		if (cf != null && cf.getPrintwriter() != null) {
+		if (cf != null && this.printwriter != null) {
 			cf.print(s);
 		} else {
 			System.out.println(s);
@@ -423,7 +423,7 @@ public class SchemaDTOBuilder {
 		
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
 		
-		JavaCompiler.CompilationTask task = javaCompiler.getTask(cf.getPrintwriter(), fileManager, diagnostics, compilerOptions, null, compilationUnits);
+		JavaCompiler.CompilationTask task = javaCompiler.getTask(this.printwriter, fileManager, diagnostics, compilerOptions, null, compilationUnits);
 		task.call();
 		
 		if (diagnostics.getDiagnostics().size()>0) {
