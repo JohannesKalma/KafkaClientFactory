@@ -86,13 +86,40 @@ public class KafkaClientFactory {
 	private String jdbcQuery;
 	private String maxErrorCount;
 	private String duration;
+	private yesNo printProperties;
+	private yesNo printParameters;
+	private yesNo printInfo;
 	
 	//private
 	//private SpecificRecord specificRecord;
-	protected PrintWriter printwriter;
+	//protected PrintWriter printwriter;
 	protected PrintWriter deadLetterPrintWriter;
 	protected PrintWriter kafkaProcessLogPrintWriter;
 	protected Connection jdbcConnection;
+	
+	public yesNo getPrintProperties() {
+		return printProperties;
+	}
+
+	public void setPrintProperties(yesNo printProperties) {
+		this.printProperties = printProperties;
+	}
+
+	public yesNo getPrintParameters() {
+		return printParameters;
+	}
+
+	public void setPrintParameters(yesNo printParameters) {
+		this.printParameters = printParameters;
+	}
+	
+	public yesNo getPrintInfo() {
+		return printInfo;
+	}
+
+	public void setPrintInfo(yesNo printInfo) {
+		this.printInfo = printInfo;
+	}
 	
 	/**
 	 * get consumer duration in ISO 8601 format
@@ -130,14 +157,14 @@ public class KafkaClientFactory {
 		this.maxErrorCount = maxErrorCount;
 	}
 
-	/**
-	 * get instance of PrintWriter
-	 * 
-	 * @return instance of PrintWriter
-	 */
-	protected PrintWriter getPrintwriter() {
-		return printwriter;
-	}
+	///**
+	// * get instance of PrintWriter
+	// * 
+	// * @return instance of PrintWriter
+	// */
+	//protected PrintWriter getPrintwriter() {
+	//	return printwriter;
+	//}
 
 	/**
 	 * set PrintWriter where to write the output (jcsOut for RMJ, System.out for
@@ -148,7 +175,8 @@ public class KafkaClientFactory {
 	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory setPrintwriter(PrintWriter printwriter) {
-		this.printwriter = printwriter;
+		//this.printwriter = printwriter;
+	  this.kafkaProcessLogPrintWriter.println("This printwriter is deprecated.");
 		return this;
 	}
 	
@@ -199,6 +227,20 @@ public class KafkaClientFactory {
 		 */
 		STRINGDES;
 	}
+	
+	/**
+	 * enum YesNo
+	 */
+	public enum yesNo {
+		/**
+		 * Y yes
+		 */
+		Y,
+		/**
+		 * N no
+		 */
+		N
+		}
 
 	/**
 	 * get typeDeSer()<br>
@@ -768,7 +810,7 @@ public class KafkaClientFactory {
 	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printProperties() {
-		return printProperties(this.getPrintwriter());
+		return printProperties(this.getKafkaProcessLogPrintWriter());
 	}
   
 	private String obfuscatePrintPropertiesValue(String key,String value) {
@@ -803,6 +845,30 @@ public class KafkaClientFactory {
 		}
 		return this;
 	}
+	
+	protected void printInit() {
+		switch (this.getPrintParameters()){
+		case Y:
+			this.printParameters();
+		default:
+			break;
+		}
+		
+		switch (this.getPrintProperties()) {
+		case Y:
+			this.printParameters();
+		default:
+			break;
+		}
+		
+		switch (this.getPrintInfo()) {
+		case Y:
+			this.printParameters();
+		default:
+			break;
+		}
+		
+	}
 
 	/**
 	 * Print a string to the PrintWriter
@@ -810,7 +876,8 @@ public class KafkaClientFactory {
 	 * @param m String
 	 */
 	public void print(String m) {
-		this.printwriter.println(m);
+		//this.printwriter.println(m);
+		this.kafkaProcessLogPrintWriter.println(m);
 	}
 	
 	/**
@@ -828,7 +895,7 @@ public class KafkaClientFactory {
 	 * @param m String
 	 */
 	public void printDL(String m) {
-		this.deadLetterPrintWriter.println(m);
+		this.deadLetterPrintWriter.println(m);		
 	}
 	
 	/**
@@ -839,7 +906,8 @@ public class KafkaClientFactory {
 	 */
 	public void printkv(String k,String v) {
 		if (KafkaUtil.isNotBlank(v))
-		  this.printwriter.printf("%s: %s%n",k,v);
+			this.kafkaProcessLogPrintWriter.println(String.format("%s: %s%n",k,v));
+		  //this.printwriter.printf("%s: %s%n",k,v);
 	}
 
 	/**
@@ -850,7 +918,7 @@ public class KafkaClientFactory {
 	 * @return This KafkaClientFactory (to allow chaining)
 	 */
 	public KafkaClientFactory printParameters() {
-		return printParameters(getPrintwriter());
+		return printParameters(this.getKafkaProcessLogPrintWriter());
 	}
 
 	/**
@@ -914,7 +982,7 @@ public class KafkaClientFactory {
 	 * constructor
 	 */
 	public KafkaClientFactory() {
-		this.printwriter = new PrintWriter(System.out,true);
+		//this.printwriter = new PrintWriter(System.out,true);
 		this.deadLetterPrintWriter = new PrintWriter(System.out,true);
 		this.kafkaProcessLogPrintWriter = new PrintWriter(System.out,true);
 	}
