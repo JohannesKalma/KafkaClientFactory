@@ -40,19 +40,11 @@ public class ProducerStatistics {
   protected void printStats() {
   	LocalDateTime now = LocalDateTime.now();
   	Duration duration = Duration.between(this.startTime,now);
-
-  	double avg = -1;
-  	double avgpersecond = -1;
-  	try {
-  	 avg=duration.toMillis()/i;
-  	} catch (Exception e) {}
   	
-  	try {
-      avgpersecond=1000/avg;
-  	} catch (Exception e) {}
-  	
+  	if (i > 10) {
+  		cf.printkv("Start", startTime.toString());
+  	}
     cf.printkv("End", now.toString());
-    cf.print("==== Producer Statistics ====");
 
     Long durationSeconds = duration.toSeconds();
     
@@ -63,9 +55,6 @@ public class ProducerStatistics {
     }
     
     cf.printkv("iterations", String.valueOf(getI()));
-    cf.printkv("millisec per message (avg)", String.format("%.5f",avg));
-    cf.printkv("messages per sec", String.format("%.2f", avgpersecond));
-    cf.printkv("messages per minute", String.format("%.2f", avgpersecond*60));
   }
   
 }
