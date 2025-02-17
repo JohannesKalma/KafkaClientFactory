@@ -131,7 +131,7 @@ public class ConsumerGeneric<V> {
 		try {
 			startTime = System.currentTimeMillis();
 
-			print("Consumer start");
+			print("Consumer start:");
 			print(String.format("servers - %s",this.kafkaClientFactory.getBootstrapServers()));
 			print(String.format("groupId - %s",this.kafkaConsumer.groupMetadata().groupId()));
 			print(String.format("topic - %s",this.kafkaClientFactory.getTopic()));
@@ -276,7 +276,6 @@ public class ConsumerGeneric<V> {
 	}
 	
 	private void print(String s) {
-		//this.kafkaClientFactory.print(s);
 		this.kafkaClientFactory.printLog(s);
 	}
 	
@@ -339,7 +338,6 @@ public class ConsumerGeneric<V> {
 	
 					stmt.execute();
 				} catch (Exception e) {
-					//print(e.toString());
 					throw new Exception(e);
 				}
 			}
