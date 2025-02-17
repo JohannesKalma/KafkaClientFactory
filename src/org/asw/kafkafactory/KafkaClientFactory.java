@@ -847,25 +847,17 @@ public class KafkaClientFactory {
 	}
 	
 	protected void printInit() {
-		switch (this.getPrintParameters()){
-		case Y:
-			this.printParameters();
-		default:
-			break;
-		}
 		
-		switch (this.getPrintProperties()) {
-		case Y:
-			this.printProperties();
-		default:
-			break;
+		if (this.getPrintParameters() != null && yesNo.Y.equals(this.getPrintParameters())) {
+				this.printParameters();
+			}
+
+		if (this.getPrintProperties() != null && yesNo.Y.equals(this.getPrintProperties())) {
+				this.printProperties();
 		}
 
-		switch (this.getPrintInfo()) {
-		case Y:
-			this.printInfo();
-		default:
-			break;
+		if (this.getPrintInfo() != null && yesNo.Y.equals(this.getPrintInfo())) {
+				this.printInfo();
 		}
 		
 	}
@@ -876,7 +868,6 @@ public class KafkaClientFactory {
 	 * @param m String
 	 */
 	public void print(String m) {
-		//this.printwriter.println(m);
 		this.kafkaProcessLogPrintWriter.println(m);
 	}
 	
