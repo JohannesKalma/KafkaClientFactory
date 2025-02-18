@@ -97,26 +97,50 @@ public class KafkaClientFactory {
 	protected PrintWriter kafkaProcessLogPrintWriter;
 	protected Connection jdbcConnection;
 	
+	/**
+	 * getPrintProperties()
+	 * @return enum value Y or N
+	 */
 	public yesNo getPrintProperties() {
 		return printProperties;
 	}
 
+	/**
+	 * setPrintProperties
+	 * When set, consumer and producer will print full set of client properties
+	 * @param printProperties enum value Y or N
+	 */
 	public void setPrintProperties(yesNo printProperties) {
 		this.printProperties = printProperties;
 	}
 
+	/**
+	 * getPrintParameters()
+	 * @return enum value Y or N
+	 */
 	public yesNo getPrintParameters() {
 		return printParameters;
 	}
-
+	/**
+	 * setPrintParameters
+	 * When set, consumer and producer will print a all translated parameters in json format
+	 * @param printParameters enum value Y or N
+	 */
 	public void setPrintParameters(yesNo printParameters) {
 		this.printParameters = printParameters;
 	}
-	
+	/**
+	 * getPrintInfo()
+	 * @return enum value Y or N
+	 */
 	public yesNo getPrintInfo() {
 		return printInfo;
 	}
-
+	/**
+	 * setPrintInfo.
+	 * When set, consumer and producer will print a minimal set of client info
+	 * @param printInfo enum value Y or N
+	 */
 	public void setPrintInfo(yesNo printInfo) {
 		this.printInfo = printInfo;
 	}

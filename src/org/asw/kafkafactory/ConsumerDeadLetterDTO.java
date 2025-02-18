@@ -83,7 +83,9 @@ public class ConsumerDeadLetterDTO {
 	 * 
 	 * @param <V> inherit from ConsumerRecord
 	 * @param record the kafka message
+	 * @param error message in string format 
 	 */
+
 	public <V> ConsumerDeadLetterDTO(ConsumerRecord<String, V> record,String error) {
     metaData = new ConsumerRecordMetaDataDTO(record);
     this.data = record.value().toString();
