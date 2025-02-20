@@ -346,7 +346,7 @@ public class ConsumerGeneric<V> {
 			print(e2.toString());
 			deadLetter(record,e2.toString());
 		} finally {
-			if (this.errorCount >= this.maxErrorCount) {
+			if (this.errorCount > 0 && this.errorCount >= this.maxErrorCount) {
 				throw new Exception(String.format(
 						"Max number (%s) of Errors in KafkaConsumer.processData().%n",
 						this.maxErrorCount));
