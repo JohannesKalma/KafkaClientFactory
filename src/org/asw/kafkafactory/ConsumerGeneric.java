@@ -26,16 +26,14 @@ public class ConsumerGeneric<V> {
 	
 	private KafkaClientFactory kafkaClientFactory;
 	private long timer;
-	private Integer errorCount;
-	//private boolean doPrintValues;
-	//private boolean doPrintMetadata;
-	//private boolean doPrintProcessingdata;
+
 	private KafkaConsumer<String, V> kafkaConsumer;
 
 	private Long startTime;
 	private Integer timerZeroIterator = 0;
 	private Integer processedIterator = 0;
 	private boolean doCommit;
+	private Integer errorCount;
 	private Integer maxErrorCount;
 
 	/**
