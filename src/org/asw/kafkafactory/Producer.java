@@ -40,6 +40,8 @@ public class Producer {
 	ProducerStatistics stats;
 	
 	boolean printRecordMetaData = false;
+	
+    //ErrorHandler errorHandler;
 
 	/**
 	 * Constructor instantiate a Producer (either String or AVRO)
@@ -50,6 +52,7 @@ public class Producer {
 	public Producer(KafkaClientFactory kafkaClientFactory) throws Exception {
 		this.kafkaClientFactory = kafkaClientFactory;
 		kafkaClientFactory.printInit();
+		//this.errorHandler = new ErrorHandler(this.kafkaClientFactory);
 	}
 
 	/**
@@ -144,7 +147,7 @@ public class Producer {
 					kafkaClientFactory.setValue(rset.getString(4));
           
 					if ((KafkaUtil.isNotBlank(kafkaClientFactory.getTopic()) && KafkaUtil.isNotBlank(kafkaClientFactory.getValue()))) { 
-   					this.publishWithCallback(id,this.stats.getI());
+   					  this.publishWithCallback(id,this.stats.getI());
 					} else {
 						try {
 						  print(String.format("cursor % returned invalid topic and/or value. Got parametervalues: %s, %s, %s, %s", rset.getCursorName(),String.valueOf(rset.getBigDecimal(1)),rset.getString(2),rset.getString(3),rset.getString(4)));
