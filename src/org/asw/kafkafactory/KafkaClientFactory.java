@@ -792,7 +792,6 @@ public class KafkaClientFactory {
 				properties.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, false);
 				properties.put(KafkaAvroSerializerConfig.USE_LATEST_VERSION,true);
 				properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-				//properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
 				properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
 				break;
 			case AVRODES:
