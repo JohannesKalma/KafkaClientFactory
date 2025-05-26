@@ -52,6 +52,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *   ]
  * </pre>
  */
+
+
 public class AvroSchemaBuilder {
 
 	// private static final Logger logger =
